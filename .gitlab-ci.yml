@@ -1,0 +1,20 @@
+image: node:22
+
+pages:
+  stage: deploy
+  cache:
+    paths:
+      - node_modules/
+  script:
+    - npm install
+    # Replace "your-project-name" and "your-repository-name" accordingly
+    - npx nx build --configuration production --base-href /castor/
+    # Move the output folder to the mandatory "public" directory
+    - mkdir .public
+    - cp -r dist/castor/browser/* .public/ || cp -r dist/castor/* .public/
+    - mv .public public
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
