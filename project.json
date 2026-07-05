@@ -9,9 +9,7 @@
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/castor",
@@ -24,9 +22,7 @@
             "input": "public"
           }
         ],
-        "styles": [
-          "./src/styles.scss"
-        ]
+        "styles": ["./src/styles.scss"]
       },
       "configurations": {
         "production": {
@@ -67,9 +63,7 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": [
-          "./src"
-        ]
+        "lintFilePatterns": ["./src"]
       }
     },
     "test": {
@@ -86,6 +80,16 @@
         "staticFilePath": "dist/castor/browser",
         "spa": true
       }
+    }
+  },
+  "deploy": {
+    "executor": "angular-cli-ghpages:deploy",
+    "options": {
+      "buildTarget": "castor:build:production",
+      "baseHref": "/castor/",
+      "name": "Tangent Chang",
+      "email": "andy23512@gmail.com",
+      "dir": "dist/castor/browser"
     }
   }
 }

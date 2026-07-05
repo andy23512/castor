@@ -47,3 +47,13 @@ Thumbs.db
 .angular
 
 __screenshots__/
+
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Ignore the generated PnP loaders
+.pnp.*
