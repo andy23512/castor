@@ -368,14 +368,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/animations@npm:^22.0.5":
-  version: 22.0.5
-  resolution: "@angular/animations@npm:22.0.5"
+"@angular/animations@npm:~21":
+  version: 21.2.17
+  resolution: "@angular/animations@npm:21.2.17"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/core": 22.0.5
-  checksum: 10c0/85262581aac077bba9dc00c4bb2b5cc8d8439056139a1777449d2ffbd89bdf5e0a0b7f5449bdf46644b50dc3383bde30e035207c892b74fae2d2a5fcd1a8024c
+    "@angular/core": 21.2.17
+  checksum: 10c0/e846d1572c6c03374cdd4115140b8630bd660e8e94f5c29f8d8a405bd79436b739105ad143738d16330f4ae3782cc28814fdd0eafa0c91fe6fbe05941d3b4195
   languageName: node
   linkType: hard
 
@@ -460,18 +460,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/cdk@npm:^22.0.3":
-  version: 22.0.3
-  resolution: "@angular/cdk@npm:22.0.3"
+"@angular/cdk@npm:~21":
+  version: 21.2.14
+  resolution: "@angular/cdk@npm:21.2.14"
   dependencies:
     parse5: "npm:^8.0.0"
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/common": ^22.0.0 || ^23.0.0
-    "@angular/core": ^22.0.0 || ^23.0.0
-    "@angular/platform-browser": ^22.0.0 || ^23.0.0
+    "@angular/common": ^21.0.0 || ^22.0.0
+    "@angular/core": ^21.0.0 || ^22.0.0
+    "@angular/platform-browser": ^21.0.0 || ^22.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/12115037c7e5b7a665bdf3f8b68070e33db9db31258f39200dce1fd8365d61410eec34a992c76cab58e9888c1f10e81d4327b7130180e6701aa0590b394e5335
+  checksum: 10c0/9c52a7942d8758ae0659583762ab6a56cde4fb97e3f6b47fca80e2bb0d99c4e9925a45136eefbb1442b98fd781f211fbe788adc0da2c091a5e58687d3818042f
   languageName: node
   linkType: hard
 
@@ -589,19 +589,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/material@npm:^22.0.3":
-  version: 22.0.3
-  resolution: "@angular/material@npm:22.0.3"
+"@angular/material@npm:~21":
+  version: 21.2.14
+  resolution: "@angular/material@npm:21.2.14"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/cdk": 22.0.3
-    "@angular/common": ^22.0.0 || ^23.0.0
-    "@angular/core": ^22.0.0 || ^23.0.0
-    "@angular/forms": ^22.0.0 || ^23.0.0
-    "@angular/platform-browser": ^22.0.0 || ^23.0.0
+    "@angular/cdk": 21.2.14
+    "@angular/common": ^21.0.0 || ^22.0.0
+    "@angular/core": ^21.0.0 || ^22.0.0
+    "@angular/forms": ^21.0.0 || ^22.0.0
+    "@angular/platform-browser": ^21.0.0 || ^22.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/8ce5089f24fd82345862699ffa63e31238f2c4c5fc9e9380e49abf2bd5016f45f537ec92f2523b242904d9fb2c2c7e54b8e7d05cf4d3742c47043ec3b5093a8a
+  checksum: 10c0/5d2e45790817f944c840ae52bcb70195bcfe56f2c3e2530719a6bb08ee865eedcd40f8466f7c9baa96b72057539a44cd7728efd680eb50ed5af55a573825b5f6
   languageName: node
   linkType: hard
 
@@ -1932,9 +1932,9 @@ __metadata:
   dependencies:
     "@angular-devkit/core": "npm:~21.2.0"
     "@angular-devkit/schematics": "npm:~21.2.0"
-    "@angular/animations": "npm:^22.0.5"
+    "@angular/animations": "npm:~21"
     "@angular/build": "npm:~21.2.0"
-    "@angular/cdk": "npm:^22.0.3"
+    "@angular/cdk": "npm:~21"
     "@angular/cli": "npm:~21.2.0"
     "@angular/common": "npm:~21.2.0"
     "@angular/compiler": "npm:~21.2.0"
@@ -1942,7 +1942,7 @@ __metadata:
     "@angular/core": "npm:~21.2.0"
     "@angular/forms": "npm:~21.2.0"
     "@angular/language-service": "npm:~21.2.0"
-    "@angular/material": "npm:^22.0.3"
+    "@angular/material": "npm:~21"
     "@angular/platform-browser": "npm:~21.2.0"
     "@angular/router": "npm:~21.2.0"
     "@eslint/js": "npm:^9.8.0"
@@ -1955,6 +1955,7 @@ __metadata:
     "@schematics/angular": "npm:~21.2.0"
     "@swc/helpers": "npm:~0.5.18"
     "@tailwindcss/postcss": "npm:^4.3.2"
+    "@types/three": "npm:^0.185.0"
     "@typescript-eslint/utils": "npm:^8.40.0"
     angular-cli-ghpages: "npm:^3.1.0"
     angular-eslint: "npm:^21.2.0"
@@ -1966,6 +1967,7 @@ __metadata:
     prettier: "npm:~3.6.2"
     rxjs: "npm:~7.8.0"
     tailwindcss: "npm:^4.3.2"
+    three: "npm:^0.185.1"
     tslib: "npm:^2.3.0"
     typescript: "npm:~5.9.2"
     typescript-eslint: "npm:^8.40.0"
@@ -2035,6 +2037,13 @@ __metadata:
   version: 4.0.0
   resolution: "@csstools/css-tokenizer@npm:4.0.0"
   checksum: 10c0/669cf3d0f9c8e1ffdf8c9955ad8beba0c8cfe03197fe29a4fcbd9ee6f7a18856cfa42c62670021a75183d9ab37f5d14a866e6a9df753a6c07f59e36797a9ea9f
+  languageName: node
+  linkType: hard
+
+"@dimforge/rapier3d-compat@npm:~0.12.0":
+  version: 0.12.0
+  resolution: "@dimforge/rapier3d-compat@npm:0.12.0"
+  checksum: 10c0/c66c24f90649c0fc870679c12e7fec1a111080d44450169b57561f957d7b6b284ad8a3ceeba95533e213176ea171351acebd3dd43885fafb33f18bfbd9d507db
   languageName: node
   linkType: hard
 
@@ -4961,6 +4970,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tweenjs/tween.js@npm:~23.1.3":
+  version: 23.1.3
+  resolution: "@tweenjs/tween.js@npm:23.1.3"
+  checksum: 10c0/811b30f5f0e7409fb41833401c501c2d6f600eb5f43039dd9067a7f70aff6dad5f5ce1233848e13f0b33a269a160d9c133f344d986cbff4f1f6b72ddecd06c89
+  languageName: node
+  linkType: hard
+
 "@tybys/wasm-util@npm:0.9.0, @tybys/wasm-util@npm:^0.9.0":
   version: 0.9.0
   resolution: "@tybys/wasm-util@npm:0.9.0"
@@ -5093,6 +5109,34 @@ __metadata:
   version: 4.0.2
   resolution: "@types/parse-json@npm:4.0.2"
   checksum: 10c0/b1b863ac34a2c2172fbe0807a1ec4d5cb684e48d422d15ec95980b81475fac4fdb3768a8b13eef39130203a7c04340fc167bae057c7ebcafd7dec9fe6c36aeb1
+  languageName: node
+  linkType: hard
+
+"@types/stats.js@npm:*":
+  version: 0.17.4
+  resolution: "@types/stats.js@npm:0.17.4"
+  checksum: 10c0/4fe0429998519f0476f03a25b4900b4d4a1474606478657271e40a884f7936ba902ea564b1c95cfd33a8e84af46cef6e1e98bb23e86fd3b6676cd5b974987151
+  languageName: node
+  linkType: hard
+
+"@types/three@npm:^0.185.0":
+  version: 0.185.0
+  resolution: "@types/three@npm:0.185.0"
+  dependencies:
+    "@dimforge/rapier3d-compat": "npm:~0.12.0"
+    "@tweenjs/tween.js": "npm:~23.1.3"
+    "@types/stats.js": "npm:*"
+    "@types/webxr": "npm:>=0.5.17"
+    fflate: "npm:~0.8.2"
+    meshoptimizer: "npm:~1.1.1"
+  checksum: 10c0/ef38ac32a35ec4a96fbffc7c82d0ceeb3b21db5d9a589e38ab1fc3c0f13cc6e26b523a4d781eb23eebcd22625ea13e14db1077e26c7692e21d63bf1a66df165b
+  languageName: node
+  linkType: hard
+
+"@types/webxr@npm:>=0.5.17":
+  version: 0.5.24
+  resolution: "@types/webxr@npm:0.5.24"
+  checksum: 10c0/ff59ffd390d06ca3f89ab2531d583ac10bc5e2ab82e5a01ecc40fbc365224a3375e7caa5b14649cf6141db21fb024940da7ad2bd8faa3cd497a6665257cb53b5
   languageName: node
   linkType: hard
 
@@ -7850,6 +7894,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fflate@npm:~0.8.2":
+  version: 0.8.3
+  resolution: "fflate@npm:0.8.3"
+  checksum: 10c0/eab181ca37f5348ae76d4b6f840e0026e30220e33153289ac942222d8b9638237d486507dbcc09878d724095bd354993a2ee48bbee99c8f2c6440d4448719aa7
+  languageName: node
+  linkType: hard
+
 "figures@npm:3.2.0":
   version: 3.2.0
   resolution: "figures@npm:3.2.0"
@@ -9591,6 +9642,13 @@ __metadata:
   version: 1.4.1
   resolution: "merge2@npm:1.4.1"
   checksum: 10c0/254a8a4605b58f450308fc474c82ac9a094848081bf4c06778200207820e5193726dc563a0d2c16468810516a5c97d9d3ea0ca6585d23c58ccfff2403e8dbbeb
+  languageName: node
+  linkType: hard
+
+"meshoptimizer@npm:~1.1.1":
+  version: 1.1.1
+  resolution: "meshoptimizer@npm:1.1.1"
+  checksum: 10c0/aacd816cbe206e49f16c88ed8b13deafec40cdb8b844080b6d614b4d945dfc7242d5dccfbc1269375a5d4dce2f354261c107d3ce6e564961bd9a220e4616dafb
   languageName: node
   linkType: hard
 
@@ -12717,6 +12775,13 @@ __metadata:
   peerDependencies:
     tslib: ^2
   checksum: 10c0/6357247872cfd0ef5407455eab2724ccbf591f0b1a56a230c66ab139dc0a8bb4acaf85c177af0eee7a49740a4674c424529eca3e573b439eb256afed4e433fac
+  languageName: node
+  linkType: hard
+
+"three@npm:^0.185.1":
+  version: 0.185.1
+  resolution: "three@npm:0.185.1"
+  checksum: 10c0/d15d3fa934f53c9fd6706965ff9946f55653bc728cf582e68acb03421c0179d7662f7d270e14bcf72923e140c36779e7fba6b0f6e542e07deade7342f63c8bdf
   languageName: node
   linkType: hard
 
