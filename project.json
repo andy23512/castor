@@ -80,16 +80,16 @@
         "staticFilePath": "dist/castor/browser",
         "spa": true
       }
-    }
-  },
-  "deploy": {
-    "executor": "angular-cli-ghpages:deploy",
-    "options": {
-      "buildTarget": "castor:build:production",
-      "baseHref": "/castor/",
-      "name": "Tangent Chang",
-      "email": "andy23512@gmail.com",
-      "dir": "dist/castor/browser"
+    },
+    "deploy": {
+      "executor": "angular-cli-ghpages:deploy",
+      "options": {
+        "buildTarget": "castor:build:production",
+        "baseHref": "/castor/",
+        "name": "Tangent Chang",
+        "email": "andy23512@gmail.com",
+        "dir": "dist/castor/browser"
+      }
     }
   }
 }
