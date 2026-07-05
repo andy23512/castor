@@ -9,7 +9,9 @@
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/castor",
@@ -22,7 +24,10 @@
             "input": "public"
           }
         ],
-        "styles": ["./src/styles.css"]
+        "styles": [
+          "src/material-theme.scss",
+          "./src/styles.css"
+        ]
       },
       "configurations": {
         "production": {
@@ -63,7 +68,9 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["./src"]
+        "lintFilePatterns": [
+          "./src"
+        ]
       }
     },
     "test": {

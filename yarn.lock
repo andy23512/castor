@@ -368,6 +368,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@angular/animations@npm:^22.0.5":
+  version: 22.0.5
+  resolution: "@angular/animations@npm:22.0.5"
+  dependencies:
+    tslib: "npm:^2.3.0"
+  peerDependencies:
+    "@angular/core": 22.0.5
+  checksum: 10c0/85262581aac077bba9dc00c4bb2b5cc8d8439056139a1777449d2ffbd89bdf5e0a0b7f5449bdf46644b50dc3383bde30e035207c892b74fae2d2a5fcd1a8024c
+  languageName: node
+  linkType: hard
+
 "@angular/build@npm:~21.2.0":
   version: 21.2.18
   resolution: "@angular/build@npm:21.2.18"
@@ -446,6 +457,21 @@ __metadata:
     vitest:
       optional: true
   checksum: 10c0/90fffb37fc136263623e2d7a82c13c554e65555830f3d312c8c4ab4f136560cd16982fefe9fb37f36c9bf22d1fd8814aa0800ddd206309357c12faa141dd4671
+  languageName: node
+  linkType: hard
+
+"@angular/cdk@npm:^22.0.3":
+  version: 22.0.3
+  resolution: "@angular/cdk@npm:22.0.3"
+  dependencies:
+    parse5: "npm:^8.0.0"
+    tslib: "npm:^2.3.0"
+  peerDependencies:
+    "@angular/common": ^22.0.0 || ^23.0.0
+    "@angular/core": ^22.0.0 || ^23.0.0
+    "@angular/platform-browser": ^22.0.0 || ^23.0.0
+    rxjs: ^6.5.3 || ^7.4.0
+  checksum: 10c0/12115037c7e5b7a665bdf3f8b68070e33db9db31258f39200dce1fd8365d61410eec34a992c76cab58e9888c1f10e81d4327b7130180e6701aa0590b394e5335
   languageName: node
   linkType: hard
 
@@ -560,6 +586,22 @@ __metadata:
   version: 21.2.17
   resolution: "@angular/language-service@npm:21.2.17"
   checksum: 10c0/3288e37eaaa43e735f37c0746b8e6cd39a6309c798e4cbd89909a79e8b70a45707cb35cf3eaa1ef386213842ac85c4dacd7914ced9d388c6dad4ca6cfb667f30
+  languageName: node
+  linkType: hard
+
+"@angular/material@npm:^22.0.3":
+  version: 22.0.3
+  resolution: "@angular/material@npm:22.0.3"
+  dependencies:
+    tslib: "npm:^2.3.0"
+  peerDependencies:
+    "@angular/cdk": 22.0.3
+    "@angular/common": ^22.0.0 || ^23.0.0
+    "@angular/core": ^22.0.0 || ^23.0.0
+    "@angular/forms": ^22.0.0 || ^23.0.0
+    "@angular/platform-browser": ^22.0.0 || ^23.0.0
+    rxjs: ^6.5.3 || ^7.4.0
+  checksum: 10c0/8ce5089f24fd82345862699ffa63e31238f2c4c5fc9e9380e49abf2bd5016f45f537ec92f2523b242904d9fb2c2c7e54b8e7d05cf4d3742c47043ec3b5093a8a
   languageName: node
   linkType: hard
 
@@ -1890,7 +1932,9 @@ __metadata:
   dependencies:
     "@angular-devkit/core": "npm:~21.2.0"
     "@angular-devkit/schematics": "npm:~21.2.0"
+    "@angular/animations": "npm:^22.0.5"
     "@angular/build": "npm:~21.2.0"
+    "@angular/cdk": "npm:^22.0.3"
     "@angular/cli": "npm:~21.2.0"
     "@angular/common": "npm:~21.2.0"
     "@angular/compiler": "npm:~21.2.0"
@@ -1898,6 +1942,7 @@ __metadata:
     "@angular/core": "npm:~21.2.0"
     "@angular/forms": "npm:~21.2.0"
     "@angular/language-service": "npm:~21.2.0"
+    "@angular/material": "npm:^22.0.3"
     "@angular/platform-browser": "npm:~21.2.0"
     "@angular/router": "npm:~21.2.0"
     "@eslint/js": "npm:^9.8.0"
