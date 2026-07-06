@@ -1,2 +1,8 @@
-<router-outlet></router-outlet>
-<div class="bg-amber-500">aaa</div>
+<div #rendererContainer class="size-full"></div>
+<button
+  mat-icon-button
+  class="!absolute top-0 left-0"
+  (click)="openSettingsDialog()"
+>
+  <mat-icon>settings</mat-icon>
+</button>

@@ -183,6 +183,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@angular-architects/ngrx-toolkit@npm:^21.0.1":
+  version: 21.0.1
+  resolution: "@angular-architects/ngrx-toolkit@npm:21.0.1"
+  dependencies:
+    tslib: "npm:^2.3.0"
+  peerDependencies:
+    "@angular/common": ^21.0.0
+    "@angular/core": ^21.0.0
+    "@ngrx/signals": ^21.0.0
+    "@ngrx/store": ^21.0.0
+    rxjs: ^7.0.0
+  peerDependenciesMeta:
+    "@ngrx/store":
+      optional: true
+  checksum: 10c0/a3fa17889c42690b9c5cfeaa6e4a3466b04f86a1cd9fcb5ca389a929f9e5376fbf19baa65c6c5ea5281108f16c8b9137c72fa7640529c56540a861d0233c7b75
+  languageName: node
+  linkType: hard
+
 "@angular-devkit/architect@npm:0.2102.18, @angular-devkit/architect@npm:>= 0.2100.0 < 0.2200.0":
   version: 0.2102.18
   resolution: "@angular-devkit/architect@npm:0.2102.18"
@@ -1930,6 +1948,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@castor/source@workspace:."
   dependencies:
+    "@angular-architects/ngrx-toolkit": "npm:^21.0.1"
     "@angular-devkit/core": "npm:~21.2.0"
     "@angular-devkit/schematics": "npm:~21.2.0"
     "@angular/animations": "npm:~21"
@@ -1946,12 +1965,14 @@ __metadata:
     "@angular/platform-browser": "npm:~21.2.0"
     "@angular/router": "npm:~21.2.0"
     "@eslint/js": "npm:^9.8.0"
+    "@ngrx/signals": "npm:^21.1.1"
     "@nx/angular": "npm:23.0.1"
     "@nx/eslint": "npm:23.0.1"
     "@nx/eslint-plugin": "npm:23.0.1"
     "@nx/js": "npm:23.0.1"
     "@nx/web": "npm:23.0.1"
     "@nx/workspace": "npm:23.0.1"
+    "@scena/ruler": "npm:^0.20.0"
     "@schematics/angular": "npm:~21.2.0"
     "@swc/helpers": "npm:~0.5.18"
     "@tailwindcss/postcss": "npm:^4.3.2"
@@ -2040,10 +2061,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@daybrush/utils@npm:^1.11.0, @daybrush/utils@npm:^1.13.0":
+  version: 1.13.0
+  resolution: "@daybrush/utils@npm:1.13.0"
+  checksum: 10c0/33fcaf0679a2de33288aa2a3f261341ec4036eabde58880874541fd276965d5f3bdf6f2afd7d7be2d8fd1d99f77b0b34c43dbf19ff9fe58a8a5d052036bacb3f
+  languageName: node
+  linkType: hard
+
 "@dimforge/rapier3d-compat@npm:~0.12.0":
   version: 0.12.0
   resolution: "@dimforge/rapier3d-compat@npm:0.12.0"
   checksum: 10c0/c66c24f90649c0fc870679c12e7fec1a111080d44450169b57561f957d7b6b284ad8a3ceeba95533e213176ea171351acebd3dd43885fafb33f18bfbd9d507db
+  languageName: node
+  linkType: hard
+
+"@egjs/list-differ@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "@egjs/list-differ@npm:1.0.1"
+  checksum: 10c0/a7c42fbef9ae25ba4f68627e1e23f11dfead2c36da2faece4621be199219e89b0e1d2763f69212389acc552fb1aee760acdfcb5bc92eae0ea3716c4b6658a13d
   languageName: node
   linkType: hard
 
@@ -3470,6 +3505,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ngrx/signals@npm:^21.1.1":
+  version: 21.1.1
+  resolution: "@ngrx/signals@npm:21.1.1"
+  dependencies:
+    tslib: "npm:^2.3.0"
+  peerDependencies:
+    "@angular/core": ^21.0.0
+    rxjs: ^6.5.3 || ^7.4.0
+  peerDependenciesMeta:
+    rxjs:
+      optional: true
+  checksum: 10c0/27f640bb610e7cdf2ebbf7350258a1fcf9a9aa6b381bb8b02bc057f40db091be66ac004f6a860be940b39a8b13e7172b88ce149e669041d15a71e0c2d1b35086
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -4694,6 +4744,26 @@ __metadata:
   version: 1.1.2
   resolution: "@rspack/lite-tapable@npm:1.1.2"
   checksum: 10c0/c5d942d5ec80d2ad5af9f85d60c13e5bef785681995ed511ec501e0a7f69e5878737ce45c058909a7f515db065630f51ed64a76452319da2f0759d35eb332439
+  languageName: node
+  linkType: hard
+
+"@scena/react-ruler@npm:~0.19.0":
+  version: 0.19.0
+  resolution: "@scena/react-ruler@npm:0.19.0"
+  dependencies:
+    "@daybrush/utils": "npm:^1.11.0"
+    framework-utils: "npm:^1.1.0"
+  checksum: 10c0/55096d2450c359c971483035d4e30fefeb52b4a0641d79460f7a964aeabf9c7d8b3b0b4bca76be691bbc0261d9786f5186cbed5e2c3073026ac221dfba89fbd3
+  languageName: node
+  linkType: hard
+
+"@scena/ruler@npm:^0.20.0":
+  version: 0.20.0
+  resolution: "@scena/ruler@npm:0.20.0"
+  dependencies:
+    croact: "npm:^1.0.3"
+    croact-ruler: "npm:~0.18.0"
+  checksum: 10c0/36807163c43ce2949c8c03671fff3685ee733df3f721a82e416112c090015a05e379597bd47b9066107ba99e3ddd5be6276b7da729c788c639c58fffd1cf397d
   languageName: node
   linkType: hard
 
@@ -6766,6 +6836,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"croact-ruler@npm:~0.18.0":
+  version: 0.18.0
+  resolution: "croact-ruler@npm:0.18.0"
+  dependencies:
+    "@scena/react-ruler": "npm:~0.19.0"
+  checksum: 10c0/e151df9f8be982dc4ebc752d034cdd8c53f95771eafaa32d1622331635b81f2e04119a189689609361c14b0e0b6c8441cd855de48168ecaec3978b451b47c73c
+  languageName: node
+  linkType: hard
+
+"croact@npm:^1.0.3":
+  version: 1.0.4
+  resolution: "croact@npm:1.0.4"
+  dependencies:
+    "@daybrush/utils": "npm:^1.13.0"
+    "@egjs/list-differ": "npm:^1.0.0"
+  checksum: 10c0/5e954d2eb81f9bc05789311bf06d4515e1b86f2c47c62345c99e7344cc598b7ebc6a384cdd2b0fe28e65216498febbf1a609f777c00cc0c9e5a2eded0614d69f
+  languageName: node
+  linkType: hard
+
 "cross-spawn@npm:^7.0.5, cross-spawn@npm:^7.0.6":
   version: 7.0.6
   resolution: "cross-spawn@npm:7.0.6"
@@ -8109,6 +8198,13 @@ __metadata:
   version: 5.3.4
   resolution: "fraction.js@npm:5.3.4"
   checksum: 10c0/f90079fe9bfc665e0a07079938e8ff71115bce9462f17b32fc283f163b0540ec34dc33df8ed41bb56f028316b04361b9a9995b9ee9258617f8338e0b05c5f95a
+  languageName: node
+  linkType: hard
+
+"framework-utils@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "framework-utils@npm:1.1.0"
+  checksum: 10c0/4c2eb183a380d66e248754ca5ee30fd0ec9153548971a45d81271f34fc413f8ea3892ab4360e0a6aa2d7ac49a13f8d1c315f9a62283f56df83b24ee1e6cfb682
   languageName: node
   linkType: hard
 

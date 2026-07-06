@@ -1,13 +1,88 @@
-import { Component } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+  viewChild,
+} from '@angular/core';
+import { MatIconButton } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
-import { NxWelcome } from './nx-welcome';
+import {
+  GridHelper,
+  OrthographicCamera,
+  Scene,
+  WebGLRenderer
+} from 'three';
+import { SettingsDialogComponent } from './components/settings-dialog/settings-dialog.component';
+import { ScreenSettingStore } from './stores/screen-setting.store';
 
 @Component({
-  imports: [NxWelcome, RouterModule],
+  imports: [RouterModule, MatIcon, MatIconButton],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
+  host: {
+    class: 'size-full relative',
+  },
 })
-export class App {
-  protected title = 'castor';
+export class App implements AfterViewInit {
+  private readonly screenSettingStore = inject(ScreenSettingStore);
+  private readonly rendererContainer =
+    viewChild<ElementRef<HTMLDivElement>>('rendererContainer');
+
+  private readonly matDialog = inject(MatDialog);
+
+  private readonly renderer = new WebGLRenderer();
+  private readonly scene = new Scene();
+  private readonly camera: OrthographicCamera;
+
+  constructor() {
+    this.camera = new OrthographicCamera();
+    this.camera.position.set(0, 0, 5);
+    const gridHelper = new GridHelper(1, 100);
+    this.scene.add(gridHelper);
+    gridHelper.rotation.x = Math.PI / 2;
+  }
+
+  public ngAfterViewInit(): void {
+    const element = this.rendererContainer()?.nativeElement;
+    if (!element) {
+      return;
+    }
+    this.onResize();
+    element.appendChild(this.renderer.domElement);
+    this.animate();
+  }
+
+  @HostListener('window:resize')
+  public onResize(): void {
+    const element = this.rendererContainer()?.nativeElement;
+    if (!element) {
+      return;
+    }
+    const ppi = this.screenSettingStore.ppi();
+    const widthMeters = (element.clientWidth / ppi) * 0.0254;
+    const heightMeters = (element.clientHeight / ppi) * 0.0254;
+    this.camera.left = -widthMeters / 2;
+    this.camera.right = widthMeters / 2;
+    this.camera.top = heightMeters / 2;
+    this.camera.bottom = -heightMeters / 2;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(element?.clientWidth, element?.clientHeight);
+  }
+
+  protected openSettingsDialog(): void {
+    this.matDialog.open(SettingsDialogComponent, {
+      width: '80vw',
+      minWidth: '80vw',
+    });
+  }
+
+  private animate(): void {
+    requestAnimationFrame(() => this.animate());
+    this.renderer.render(this.scene, this.camera);
+  }
 }
