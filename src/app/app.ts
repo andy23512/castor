@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   Component,
+  effect,
   ElementRef,
   HostListener,
   inject,
@@ -11,11 +12,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import {
+  AmbientLight,
+  DirectionalLight,
   GridHelper,
   OrthographicCamera,
   Scene,
-  WebGLRenderer
+  WebGLRenderer,
 } from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SettingsDialogComponent } from './components/settings-dialog/settings-dialog.component';
 import { ScreenSettingStore } from './stores/screen-setting.store';
 
@@ -45,6 +49,26 @@ export class App implements AfterViewInit {
     const gridHelper = new GridHelper(1, 100);
     this.scene.add(gridHelper);
     gridHelper.rotation.x = Math.PI / 2;
+    this.scene.add(new AmbientLight(0xffffff, 1.0));
+    const light = new DirectionalLight(0xffffff, 0.8);
+    light.position.set(5, 10, 7);
+    this.scene.add(light);
+    const loader = new GLTFLoader();
+    loader.load(
+      'charachorder-models/CC2 Full Assembly.glb',
+      (gltf) => {
+        gltf.scene.rotation.x = Math.PI / 2;
+        this.scene.add(gltf.scene); // Add loaded model
+      },
+      undefined,
+      (error) => {
+        console.error(error);
+      },
+    );
+    effect(() => {
+      this.screenSettingStore.ppi();
+      this.onResize();
+    });
   }
 
   public ngAfterViewInit(): void {
