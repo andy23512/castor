@@ -1,0 +1,14 @@
+:host {
+	background:
+		radial-gradient(circle at 20% 10%, rgba(76, 88, 112, 0.2), transparent 38%),
+		radial-gradient(circle at 80% 85%, rgba(56, 64, 84, 0.14), transparent 46%),
+		linear-gradient(180deg, #1a1c22 0%, #14161b 100%);
+}
+
+:host::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background: radial-gradient(circle at center, transparent 56%, rgba(0, 0, 0, 0.36) 100%);
+}
