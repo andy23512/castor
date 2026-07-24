@@ -28,6 +28,7 @@ import {
   WebGLRenderer,
 } from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SettingsDialogComponent } from './components/settings-dialog/settings-dialog.component';
 import { ScreenSettingStore } from './stores/screen-setting.store';
@@ -103,7 +104,8 @@ export class App implements AfterViewInit {
     rimLight.position.set(0.1, -2.8, -5.8);
     this.scene.add(rimLight);
 
-    const loader = new GLTFLoader();
+    // The model is meshopt-compressed; the decoder embeds its own wasm.
+    const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
     loader.load(
       'charachorder-models/CC2 Full Assembly.glb',
       (gltf) => {

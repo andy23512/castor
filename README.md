@@ -37,6 +37,30 @@ is.
   CAD sources, so its dimensions are the physical ones.
 - The background grid is 1 cm per cell.
 
+## Models
+
+`CC2 Full Assembly.glb` is a compressed derivative of the CC2 assembly from
+[CharaChorder/CAD-CAM](https://github.com/CharaChorder/CAD-CAM/), 10.5 MB reduced to 1.3 MB with
+[glTF-Transform](https://gltf-transform.dev/):
+
+```bash
+gltf-transform dedup in.glb a.glb
+gltf-transform prune a.glb b.glb
+gltf-transform weld b.glb c.glb
+gltf-transform simplify c.glb d.glb --error 0.0001
+gltf-transform meshopt d.glb out.glb
+```
+
+The result is loaded with `MeshoptDecoder`, which carries its own wasm and needs no extra files.
+
+Because this app exists to show a device at its true size, **any change to that pipeline has to be
+checked against the measured dimensions of the model**. The assembly is 319.133 x 32.239 x
+133.723 mm, and the steps above keep it within 0.002 mm of that.
+
+`gltf-transform optimize` is deliberately not used: its `join` and `instance` steps rewrite the node
+transforms in a way three.js reads differently, which silently shrank the assembly to
+295.557 x 28.251 x 110.161 mm — 7% too small.
+
 ## Development
 
 Requires Node 22+ and yarn.
@@ -79,4 +103,4 @@ configuration for GitLab Pages is included as an alternative.
 
 This project's source code is licensed under the [MIT License](LICENSE).
 
-However, the models located in the `static/charachorder-models` directory are licensed separately under the [CharaChorder BY-SA-CR](static/charachorder-models/LICENSE.md) License per the ShareAlike restriction of the [CharaChorder/CAD-CAM repository](https://github.com/CharaChorder/CAD-CAM/).
+However, the models located in the `static/charachorder-models` directory are licensed separately under the [CharaChorder BY-SA-CR](static/charachorder-models/LICENSE.md) License per the ShareAlike restriction of the [CharaChorder/CAD-CAM repository](https://github.com/CharaChorder/CAD-CAM/). They are redistributed here in modified form: the geometry is compressed as described under [Models](#models), and is otherwise unchanged.
