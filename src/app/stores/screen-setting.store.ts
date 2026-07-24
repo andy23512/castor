@@ -11,19 +11,21 @@ import {
   withState,
 } from '@ngrx/signals';
 import { ScreenSetting } from '../models/screen-setting.models';
+import {
+  clampPpi,
+  DEFAULT_PPI,
+  ppiFromDisplaySpecs,
+} from '../utils/calibration.utils';
 import { prefixStorageKey } from '../utils/store.utils';
 
 const FALLBACK_RESOLUTION_WIDTH = 1920;
 const FALLBACK_RESOLUTION_HEIGHT = 1080;
-const MIN_PPI = 1;
-const MAX_PPI = 2000;
-const FALLBACK_PPI = 96;
 const SCREEN_SETTING_KEY = 'screenSetting';
 
 /**
  * `screen.width`/`screen.height` report the logical resolution, which is what
- * this app needs. It is only a starting guess: the physical screen size cannot
- * be detected, so the user still has to calibrate.
+ * the advanced panel asks for. It is only a starting guess: the physical screen
+ * size cannot be detected, so the user still has to calibrate.
  */
 function detectLogicalResolution(): Pick<
   ScreenSetting,
@@ -41,12 +43,23 @@ function detectLogicalResolution(): Pick<
 
 export function createInitialScreenSetting(): ScreenSetting {
   return {
+    pixelsPerInch: DEFAULT_PPI,
     ...detectLogicalResolution(),
     screenSizeInInches: 24,
     zoomPercentage: 100,
     calibratedAt: null,
     promptedAt: null,
   };
+}
+
+export function parseScreenSetting(stateString: string): ScreenSetting {
+  const stored = JSON.parse(stateString) as Partial<ScreenSetting>;
+  const setting = { ...createInitialScreenSetting(), ...stored };
+  if (stored.pixelsPerInch === undefined) {
+    // Settings stored before the card calibration only held the display specs.
+    setting.pixelsPerInch = ppiFromDisplaySpecs(setting);
+  }
+  return setting;
 }
 
 export const ScreenSettingStore = signalStore(
@@ -56,15 +69,32 @@ export const ScreenSettingStore = signalStore(
   withDevtools(SCREEN_SETTING_KEY),
   withStorageSync({
     key: prefixStorageKey(SCREEN_SETTING_KEY),
-    parse(stateString: string): ScreenSetting {
-      // Merging keeps settings stored by older versions loadable.
-      return { ...createInitialScreenSetting(), ...JSON.parse(stateString) };
-    },
+    parse: parseScreenSetting,
   }),
   withState(createInitialScreenSetting),
+  withComputed((state) => ({
+    ppi: computed(() => clampPpi(state.pixelsPerInch())),
+    /** What the advanced panel would apply, previewed while typing. */
+    displaySpecsPpi: computed(() =>
+      ppiFromDisplaySpecs({
+        logicalResolutionWidth: state.logicalResolutionWidth(),
+        logicalResolutionHeight: state.logicalResolutionHeight(),
+        screenSizeInInches: state.screenSizeInInches(),
+        zoomPercentage: state.zoomPercentage(),
+      }),
+    ),
+    isCalibrated: computed(() => state.calibratedAt() !== null),
+    hasBeenPrompted: computed(() => state.promptedAt() !== null),
+  })),
   withMethods((store) => ({
     set<P extends keyof ScreenSetting>(prop: P, value: ScreenSetting[P]): void {
       patchState(store, () => ({ [prop]: value }));
+    },
+    setPpi(pixelsPerInch: number): void {
+      patchState(store, { pixelsPerInch: clampPpi(pixelsPerInch) });
+    },
+    applyDisplaySpecs(): void {
+      patchState(store, { pixelsPerInch: store.displaySpecsPpi() });
     },
     markCalibrated(): void {
       patchState(store, { calibratedAt: Date.now() });
@@ -72,20 +102,5 @@ export const ScreenSettingStore = signalStore(
     markPrompted(): void {
       patchState(store, { promptedAt: Date.now() });
     },
-  })),
-  withComputed((state) => ({
-    isCalibrated: computed(() => state.calibratedAt() !== null),
-    hasBeenPrompted: computed(() => state.promptedAt() !== null),
-    ppi: computed(() => {
-      const rw = state.logicalResolutionWidth();
-      const rh = state.logicalResolutionHeight();
-      const size = state.screenSizeInInches();
-      const zoom = state.zoomPercentage();
-      const ppi = ((Math.sqrt(rw ** 2 + rh ** 2) / size) * 100) / zoom;
-      // A cleared or half-typed input must not reach the camera as NaN/Infinity.
-      return Number.isFinite(ppi)
-        ? Math.min(Math.max(ppi, MIN_PPI), MAX_PPI)
-        : FALLBACK_PPI;
-    }),
   })),
 );

@@ -183,8 +183,10 @@ export class App implements AfterViewInit {
       return;
     }
     this.matDialog.open(SettingsDialogComponent, {
-      width: '560px',
-      maxWidth: '92vw',
+      // Wide enough that a 3.37 inch card still fits on a high-ppi display.
+      width: '900px',
+      maxWidth: '96vw',
+      panelClass: 'calibration-dialog',
       // Focusing the first input would scroll the explanation out of view.
       autoFocus: 'dialog',
     });

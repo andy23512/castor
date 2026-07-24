@@ -1,0 +1,45 @@
+<!-- The slider sits above the card so that it stays reachable on a phone,
+     where an upright card is taller than the visible dialog area. -->
+<div class="mb-2 flex items-center gap-2">
+  <mat-slider class="grow" [min]="minPpi" [max]="maxPpi" step="0.5">
+    <input
+      matSliderThumb
+      aria-label="Card size"
+      [value]="ppi()"
+      (valueChange)="ppi.set($event)"
+    />
+  </mat-slider>
+  <button
+    mat-icon-button
+    type="button"
+    aria-label="Rotate the card"
+    [disabled]="mustRotate()"
+    (click)="toggleRotation()"
+  >
+    <mat-icon>rotate_90_degrees_cw</mat-icon>
+  </button>
+</div>
+<div #container class="w-full overflow-x-auto">
+  <div
+    #card
+    class="relative flex select-none items-center justify-center bg-amber-500/60 text-sm text-white ring-1 ring-amber-200/60"
+    [style.width.px]="cardWidth()"
+    [style.height.px]="cardHeight()"
+    [style.border-radius.px]="cardCornerRadius()"
+  >
+    <span class="pointer-events-none px-2 text-center">
+      Match a real card
+    </span>
+    <div
+      class="absolute right-0 bottom-0 flex h-9 w-9 cursor-nwse-resize touch-none items-end justify-end bg-amber-300/90 p-1 text-black"
+      [style.border-top-left-radius.px]="cardCornerRadius()"
+      [style.border-bottom-right-radius.px]="cardCornerRadius()"
+      (pointerdown)="onDragStart($event)"
+      (pointermove)="onDragMove($event)"
+      (pointerup)="onDragEnd($event)"
+      (pointercancel)="onDragEnd($event)"
+    >
+      <mat-icon class="!h-5 !w-5 !text-[20px]">open_in_full</mat-icon>
+    </div>
+  </div>
+</div>

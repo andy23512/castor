@@ -6,6 +6,7 @@ import {
   ElementRef,
   HostListener,
   inject,
+  signal,
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -18,10 +19,12 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 import { MatFormField } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import Ruler from '@scena/ruler';
 import { ScreenSetting } from '../../models/screen-setting.models';
 import { ScreenSettingStore } from '../../stores/screen-setting.store';
+import { CardCalibrationComponent } from '../card-calibration/card-calibration.component';
 
 @Component({
   selector: 'app-settings-dialog',
@@ -35,8 +38,10 @@ import { ScreenSettingStore } from '../../stores/screen-setting.store';
     MatDialogTitle,
     MatButton,
     MatFormField,
+    MatIcon,
     MatInput,
     FormsModule,
+    CardCalibrationComponent,
   ],
 })
 export class SettingsDialogComponent {
@@ -52,25 +57,18 @@ export class SettingsDialogComponent {
   protected readonly zoomPercentage = this.screenSettingStore.zoomPercentage;
   protected readonly ppi = this.screenSettingStore.ppi;
   protected readonly isCalibrated = this.screenSettingStore.isCalibrated;
-  protected readonly ppiDisplay = computed(() => this.ppi().toFixed(2));
+  protected readonly displaySpecsPpi = this.screenSettingStore.displaySpecsPpi;
+  protected readonly ppiDisplay = computed(() => this.ppi().toFixed(1));
+  protected readonly displaySpecsPpiDisplay = computed(() =>
+    this.displaySpecsPpi().toFixed(1),
+  );
+  protected readonly isShowingAdvanced = signal(false);
   private readonly inchRulerElement =
     viewChild<ElementRef<HTMLDivElement>>('inchRuler');
   private inchRulerInstance: Ruler | null = null;
   private readonly cmRulerElement =
     viewChild<ElementRef<HTMLDivElement>>('cmRuler');
   private cmRulerInstance: Ruler | null = null;
-  protected readonly creditCardWidth = computed(() => {
-    const ppi = this.ppi();
-    return 3.37 * ppi;
-  });
-  protected readonly creditCardHeight = computed(() => {
-    const ppi = this.ppi();
-    return 2.125 * ppi;
-  });
-  protected readonly creditCardBorderRadius = computed(() => {
-    const ppi = this.ppi();
-    return 0.125 * ppi;
-  });
 
   constructor() {
     effect(() => {
@@ -103,11 +101,23 @@ export class SettingsDialogComponent {
     });
   }
 
+  protected setPpi(ppi: number): void {
+    this.screenSettingStore.setPpi(ppi);
+  }
+
   protected setScreenSetting<K extends keyof ScreenSetting>(
     key: K,
     value: ScreenSetting[K],
   ): void {
     this.screenSettingStore.set(key, value);
+  }
+
+  protected applyDisplaySpecs(): void {
+    this.screenSettingStore.applyDisplaySpecs();
+  }
+
+  protected toggleAdvanced(): void {
+    this.isShowingAdvanced.update((showing) => !showing);
   }
 
   protected confirmCalibration(): void {

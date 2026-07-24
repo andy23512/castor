@@ -1,97 +1,112 @@
 <h2 mat-dialog-title>Screen Calibration</h2>
 <mat-dialog-content>
-  @if (!isCalibrated()) {
-    <p class="mb-4 text-sm opacity-80">
-      To show the device at its real size, this app needs to know how large one
-      inch is on your screen. Enter your display settings below, then hold a real
-      credit card against the orange rectangle to check the result.
-    </p>
-  }
+  <p class="mb-4 text-sm opacity-80">
+    Hold a bank card, ID card or driving licence against the screen and drag the
+    corner until the rectangle matches it. Every size in this app is scaled from
+    that one measurement.
+  </p>
+
+  <app-card-calibration [ppi]="ppi()" (ppiChange)="setPpi($event)" />
+
+  <p class="mt-4 mb-1 text-sm opacity-80">
+    1 inch = {{ ppiDisplay() }} px. Check it against these rulers:
+  </p>
   <div>
-    Logical Resolution:
-    <mat-form-field appearance="outline" class="!w-32 compact-form-field">
-      <input
-        matInput
-        type="number"
-        min="1"
-        [ngModel]="logicalResolutionWidth()"
-        (ngModelChange)="setScreenSetting('logicalResolutionWidth', $event)"
-      />
-    </mat-form-field>
-    X
-    <mat-form-field appearance="outline" class="!w-32 compact-form-field">
-      <input
-        matInput
-        type="number"
-        min="1"
-        [ngModel]="logicalResolutionHeight()"
-        (ngModelChange)="setScreenSetting('logicalResolutionHeight', $event)"
-      />
-    </mat-form-field>
-  </div>
-  <div>
-    Screen Size (inches):
-    <mat-form-field appearance="outline" class="!w-32 compact-form-field">
-      <input
-        matInput
-        type="number"
-        min="1"
-        step="0.1"
-        [ngModel]="screenSizeInInches()"
-        (ngModelChange)="setScreenSetting('screenSizeInInches', $event)"
-      />
-    </mat-form-field>
-  </div>
-  <div>
-    Zoom Percentage:
-    <mat-form-field appearance="outline" class="!w-32 compact-form-field">
-      <input
-        matInput
-        type="number"
-        min="1"
-        [ngModel]="zoomPercentage()"
-        (ngModelChange)="setScreenSetting('zoomPercentage', $event)"
-      />
-    </mat-form-field>
-  </div>
-  <div>
-    Logical Pixel Per Inch:
-    <math class="text-xl">
-      <mfrac>
-        <msqrt>
-          <msup>
-            <mi>{{ logicalResolutionWidth() }}</mi>
-            <ms>2</ms>
-          </msup>
-          <mo>+</mo>
-          <msup>
-            <mi>{{ logicalResolutionHeight() }}</mi>
-            <ms>2</ms>
-          </msup>
-        </msqrt>
-        <mrow>
-          <mi>{{ screenSizeInInches() }}</mi>
-          <mo>&times;</mo>
-          <mi>{{ zoomPercentage() }}</mi>
-          <mo>%</mo>
-        </mrow>
-      </mfrac>
-      <mo>=</mo>
-      <mi>{{ ppiDisplay() }}</mi>
-    </math>
-  </div>
-  <div class="mt-2">
     <div #inchRuler class="h-[30px]"></div>
     <div #cmRuler class="h-[30px]"></div>
   </div>
-  <div
-    class="mt-2 bg-amber-500/50 flex items-center justify-center text-white"
-    [style.width.px]="creditCardWidth()"
-    [style.height.px]="creditCardHeight()"
-    [style.border-radius.px]="creditCardBorderRadius()"
+
+  <button
+    mat-button
+    type="button"
+    class="!mt-4 !px-0"
+    (click)="toggleAdvanced()"
   >
-    Credit Card
-  </div>
+    <mat-icon>{{ isShowingAdvanced() ? 'expand_less' : 'expand_more' }}</mat-icon>
+    No card at hand? Enter your display specs
+  </button>
+
+  @if (isShowingAdvanced()) {
+    <div>
+      Logical Resolution:
+      <mat-form-field appearance="outline" class="!w-32 compact-form-field">
+        <input
+          matInput
+          type="number"
+          min="1"
+          [ngModel]="logicalResolutionWidth()"
+          (ngModelChange)="setScreenSetting('logicalResolutionWidth', $event)"
+        />
+      </mat-form-field>
+      X
+      <mat-form-field appearance="outline" class="!w-32 compact-form-field">
+        <input
+          matInput
+          type="number"
+          min="1"
+          [ngModel]="logicalResolutionHeight()"
+          (ngModelChange)="setScreenSetting('logicalResolutionHeight', $event)"
+        />
+      </mat-form-field>
+    </div>
+    <div>
+      Screen Size (inches):
+      <mat-form-field appearance="outline" class="!w-32 compact-form-field">
+        <input
+          matInput
+          type="number"
+          min="1"
+          step="0.1"
+          [ngModel]="screenSizeInInches()"
+          (ngModelChange)="setScreenSetting('screenSizeInInches', $event)"
+        />
+      </mat-form-field>
+    </div>
+    <div>
+      Zoom Percentage:
+      <mat-form-field appearance="outline" class="!w-32 compact-form-field">
+        <input
+          matInput
+          type="number"
+          min="1"
+          [ngModel]="zoomPercentage()"
+          (ngModelChange)="setScreenSetting('zoomPercentage', $event)"
+        />
+      </mat-form-field>
+    </div>
+    <div class="flex flex-wrap items-center gap-3">
+      <math class="text-xl">
+        <mfrac>
+          <msqrt>
+            <msup>
+              <mi>{{ logicalResolutionWidth() }}</mi>
+              <ms>2</ms>
+            </msup>
+            <mo>+</mo>
+            <msup>
+              <mi>{{ logicalResolutionHeight() }}</mi>
+              <ms>2</ms>
+            </msup>
+          </msqrt>
+          <mrow>
+            <mi>{{ screenSizeInInches() }}</mi>
+            <mo>&times;</mo>
+            <mi>{{ zoomPercentage() }}</mi>
+            <mo>%</mo>
+          </mrow>
+        </mfrac>
+        <mo>=</mo>
+        <mi>{{ displaySpecsPpiDisplay() }}</mi>
+      </math>
+      <button mat-stroked-button type="button" (click)="applyDisplaySpecs()">
+        Use this value
+      </button>
+    </div>
+    <p class="mt-2 text-xs opacity-70">
+      The advertised screen size is often rounded, so this is less accurate than
+      matching a card.
+    </p>
+  }
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   @if (isCalibrated()) {
