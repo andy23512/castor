@@ -2,10 +2,13 @@ import {
   AfterViewInit,
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   HostListener,
   inject,
+  signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -15,6 +18,7 @@ import { RouterModule } from '@angular/router';
 import {
   ACESFilmicToneMapping,
   AmbientLight,
+  Box3,
   Color,
   DirectionalLight,
   GridHelper,
@@ -25,6 +29,7 @@ import {
   PMREMGenerator,
   Scene,
   SRGBColorSpace,
+  Vector3,
   WebGLRenderer,
 } from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -32,6 +37,7 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SettingsDialogComponent } from './components/settings-dialog/settings-dialog.component';
 import { ScreenSettingStore } from './stores/screen-setting.store';
+import { clampPanOffset, pixelsToMetres } from './utils/pan.utils';
 
 @Component({
   imports: [RouterModule, MatIcon, MatButton, MatIconButton],
@@ -52,10 +58,30 @@ export class App implements AfterViewInit {
     viewChild<ElementRef<HTMLDivElement>>('rendererContainer');
 
   private readonly matDialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly renderer = new WebGLRenderer();
   private readonly scene = new Scene();
   private readonly camera: OrthographicCamera;
+
+  /** Everything below is in metres, the unit the scene is modelled in. */
+  private readonly viewSize = signal({ width: 0, height: 0 });
+  private readonly modelSize = signal({ width: 0, height: 0 });
+  private readonly pan = signal({ x: 0, y: 0 });
+
+  /** At actual size the device is wider than most laptop screens. */
+  protected readonly canPan = computed(() => {
+    const view = this.viewSize();
+    const model = this.modelSize();
+    return model.width > view.width || model.height > view.height;
+  });
+  protected readonly isPanned = computed(
+    () => this.pan().x !== 0 || this.pan().y !== 0,
+  );
+  protected readonly isPanning = signal(false);
+
+  private frameHandle: number | null = null;
+  private drag: { pointerId: number; x: number; y: number } | null = null;
 
   constructor() {
     this.camera = new OrthographicCamera();
@@ -138,6 +164,11 @@ export class App implements AfterViewInit {
         });
         gltf.scene.rotation.x = Math.PI / 2;
         this.scene.add(gltf.scene); // Add loaded model
+        const size = new Box3()
+          .setFromObject(gltf.scene)
+          .getSize(new Vector3());
+        this.modelSize.set({ width: size.x, height: size.y });
+        this.onResize();
         this.promptCalibrationOnce();
       },
       undefined,
@@ -148,7 +179,15 @@ export class App implements AfterViewInit {
     );
     effect(() => {
       this.screenSettingStore.ppi();
-      this.onResize();
+      // Untracked: onResize both reads and writes the pan, which would
+      // otherwise make this effect re-trigger itself.
+      untracked(() => this.onResize());
+    });
+    this.destroyRef.onDestroy(() => {
+      if (this.frameHandle !== null) {
+        cancelAnimationFrame(this.frameHandle);
+      }
+      this.renderer.dispose();
     });
   }
 
@@ -159,7 +198,7 @@ export class App implements AfterViewInit {
     }
     this.onResize();
     element.appendChild(this.renderer.domElement);
-    this.animate();
+    this.requestRender();
   }
 
   @HostListener('window:resize')
@@ -169,15 +208,81 @@ export class App implements AfterViewInit {
       return;
     }
     const ppi = this.screenSettingStore.ppi();
-    const widthMeters = (element.clientWidth / ppi) * 0.0254;
-    const heightMeters = (element.clientHeight / ppi) * 0.0254;
+    const widthMeters = pixelsToMetres(element.clientWidth, ppi);
+    const heightMeters = pixelsToMetres(element.clientHeight, ppi);
+    this.viewSize.set({ width: widthMeters, height: heightMeters });
     this.camera.left = -widthMeters / 2;
     this.camera.right = widthMeters / 2;
     this.camera.top = heightMeters / 2;
     this.camera.bottom = -heightMeters / 2;
     this.camera.updateProjectionMatrix();
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.setSize(element?.clientWidth, element?.clientHeight);
+    this.renderer.setSize(element.clientWidth, element.clientHeight);
+    // A smaller view, or a new model, can put the camera out of bounds.
+    this.setPan(this.pan().x, this.pan().y);
+  }
+
+  protected onPanStart(event: PointerEvent): void {
+    if (!this.canPan()) {
+      return;
+    }
+    this.drag = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+    };
+    this.isPanning.set(true);
+    (event.currentTarget as Element).setPointerCapture(event.pointerId);
+  }
+
+  protected onPanMove(event: PointerEvent): void {
+    if (this.drag?.pointerId !== event.pointerId) {
+      return;
+    }
+    const ppi = this.screenSettingStore.ppi();
+    const dx = pixelsToMetres(event.clientX - this.drag.x, ppi);
+    const dy = pixelsToMetres(event.clientY - this.drag.y, ppi);
+    this.drag.x = event.clientX;
+    this.drag.y = event.clientY;
+    // The model follows the pointer, so the camera moves the other way. Screen
+    // y grows downwards while world y grows upwards.
+    this.setPan(this.pan().x - dx, this.pan().y + dy);
+  }
+
+  protected onPanEnd(event: PointerEvent): void {
+    if (this.drag?.pointerId !== event.pointerId) {
+      return;
+    }
+    (event.currentTarget as Element).releasePointerCapture(event.pointerId);
+    this.drag = null;
+    this.isPanning.set(false);
+  }
+
+  protected recenter(): void {
+    this.setPan(0, 0);
+  }
+
+  private setPan(x: number, y: number): void {
+    const view = this.viewSize();
+    const model = this.modelSize();
+    const panned = {
+      x: clampPanOffset(x, model.width, view.width),
+      y: clampPanOffset(y, model.height, view.height),
+    };
+    this.pan.set(panned);
+    this.camera.position.set(panned.x, panned.y, this.camera.position.z);
+    this.requestRender();
+  }
+
+  /** Nothing animates, so a frame is only drawn when something changed. */
+  private requestRender(): void {
+    if (this.frameHandle !== null) {
+      return;
+    }
+    this.frameHandle = requestAnimationFrame(() => {
+      this.frameHandle = null;
+      this.renderer.render(this.scene, this.camera);
+    });
   }
 
   protected openSettingsDialog(): void {
@@ -209,10 +314,5 @@ export class App implements AfterViewInit {
     }
     this.screenSettingStore.markPrompted();
     this.openSettingsDialog();
-  }
-
-  private animate(): void {
-    requestAnimationFrame(() => this.animate());
-    this.renderer.render(this.scene, this.camera);
   }
 }

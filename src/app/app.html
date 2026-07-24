@@ -1,4 +1,13 @@
-<div #rendererContainer class="size-full"></div>
+<div
+  #rendererContainer
+  class="size-full touch-none"
+  [class.cursor-grab]="canPan() && !isPanning()"
+  [class.cursor-grabbing]="isPanning()"
+  (pointerdown)="onPanStart($event)"
+  (pointermove)="onPanMove($event)"
+  (pointerup)="onPanEnd($event)"
+  (pointercancel)="onPanEnd($event)"
+></div>
 <button
   mat-icon-button
   class="!absolute top-0 left-0"
@@ -6,11 +15,24 @@
 >
   <mat-icon>settings</mat-icon>
 </button>
+@if (isPanned()) {
+  <button
+    mat-icon-button
+    class="!absolute top-0 right-0"
+    aria-label="Move the device back to the centre"
+    (click)="recenter()"
+  >
+    <mat-icon>filter_center_focus</mat-icon>
+  </button>
+}
 @if (isCalibrated()) {
   <div
     class="!absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300 ring-1 ring-white/10"
   >
     Actual size &middot; {{ ppiDisplay() }} px/inch
+    @if (canPan()) {
+      &middot; drag to see the rest
+    }
   </div>
 } @else {
   <div
