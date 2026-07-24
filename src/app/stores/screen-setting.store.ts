@@ -13,6 +13,7 @@ import {
 import { ScreenSetting } from '../models/screen-setting.models';
 import {
   clampPpi,
+  currentPixelRatio,
   DEFAULT_PPI,
   ppiFromDisplaySpecs,
 } from '../utils/calibration.utils';
@@ -48,6 +49,7 @@ export function createInitialScreenSetting(): ScreenSetting {
     screenSizeInInches: 24,
     zoomPercentage: 100,
     calibratedAt: null,
+    calibratedPixelRatio: null,
     promptedAt: null,
   };
 }
@@ -97,7 +99,27 @@ export const ScreenSettingStore = signalStore(
       patchState(store, { pixelsPerInch: store.displaySpecsPpi() });
     },
     markCalibrated(): void {
-      patchState(store, { calibratedAt: Date.now() });
+      patchState(store, {
+        calibratedAt: Date.now(),
+        calibratedPixelRatio: currentPixelRatio(),
+      });
+    },
+    /**
+     * Rescales the calibration for a changed `devicePixelRatio`. This is exact
+     * when the browser zoom changed, which is the common case; moving the
+     * window to a screen of another density changes the ratio too, and there
+     * the user has to calibrate again.
+     */
+    adjustForPixelRatio(pixelRatio: number): void {
+      const calibrated = store.calibratedPixelRatio();
+      if (calibrated === null || pixelRatio <= 0) {
+        return;
+      }
+      patchState(store, {
+        pixelsPerInch: clampPpi(store.ppi() * (calibrated / pixelRatio)),
+        calibratedPixelRatio: pixelRatio,
+        calibratedAt: Date.now(),
+      });
     },
     markPrompted(): void {
       patchState(store, { promptedAt: Date.now() });

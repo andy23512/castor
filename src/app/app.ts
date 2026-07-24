@@ -37,6 +37,7 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SettingsDialogComponent } from './components/settings-dialog/settings-dialog.component';
 import { ScreenSettingStore } from './stores/screen-setting.store';
+import { currentPixelRatio } from './utils/calibration.utils';
 import { clampPanOffset, pixelsToMetres } from './utils/pan.utils';
 
 @Component({
@@ -80,6 +81,13 @@ export class App implements AfterViewInit {
   );
   protected readonly isPanning = signal(false);
   protected readonly hasModelFailed = signal(false);
+
+  private readonly pixelRatio = signal(currentPixelRatio());
+  /** A CSS pixel is no longer the size the calibration was measured at. */
+  protected readonly isCalibrationStale = computed(() => {
+    const calibrated = this.screenSettingStore.calibratedPixelRatio();
+    return calibrated !== null && calibrated !== this.pixelRatio();
+  });
 
   private frameHandle: number | null = null;
   private drag: { pointerId: number; x: number; y: number } | null = null;
@@ -132,6 +140,7 @@ export class App implements AfterViewInit {
     this.scene.add(rimLight);
 
     this.loadModel();
+    this.watchPixelRatio();
     effect(() => {
       this.screenSettingStore.ppi();
       // Untracked: onResize both reads and writes the pan, which would
@@ -203,6 +212,26 @@ export class App implements AfterViewInit {
     this.loadModel();
   }
 
+  /**
+   * Browser zoom and a move to a screen of another density both change
+   * `devicePixelRatio`. There is no event for it, so the current ratio is
+   * watched as a media query and the watch is renewed on every change.
+   */
+  private watchPixelRatio(): void {
+    const media = matchMedia(`(resolution: ${currentPixelRatio()}dppx)`);
+    const onChange = () => {
+      media.removeEventListener('change', onChange);
+      this.pixelRatio.set(currentPixelRatio());
+      this.watchPixelRatio();
+    };
+    media.addEventListener('change', onChange);
+    this.destroyRef.onDestroy(() => media.removeEventListener('change', onChange));
+  }
+
+  protected adjustForPixelRatio(): void {
+    this.screenSettingStore.adjustForPixelRatio(this.pixelRatio());
+  }
+
   public ngAfterViewInit(): void {
     const element = this.rendererContainer()?.nativeElement;
     if (!element) {
@@ -219,6 +248,9 @@ export class App implements AfterViewInit {
     if (!element) {
       return;
     }
+    // Backstop for the media query watch: moving a window between screens of
+    // different densities resizes it too.
+    this.pixelRatio.set(currentPixelRatio());
     const ppi = this.screenSettingStore.ppi();
     const widthMeters = pixelsToMetres(element.clientWidth, ppi);
     const heightMeters = pixelsToMetres(element.clientHeight, ppi);

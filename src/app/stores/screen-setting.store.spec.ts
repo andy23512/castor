@@ -65,6 +65,29 @@ describe('ScreenSettingStore', () => {
     expect(store.isCalibrated()).toBe(true);
   });
 
+  it('rescales the calibration when the browser zoom changed', () => {
+    const store = TestBed.inject(ScreenSettingStore);
+    store.setPpi(138.5);
+    store.markCalibrated();
+
+    // jsdom reports devicePixelRatio 1, so zooming to 150% lands on 1.5.
+    store.adjustForPixelRatio(1.5);
+
+    // Bigger CSS pixels mean fewer of them per inch.
+    expect(store.ppi()).toBeCloseTo(138.5 / 1.5, 6);
+    expect(store.calibratedPixelRatio()).toBe(1.5);
+  });
+
+  it('ignores a pixel ratio change before any calibration', () => {
+    const store = TestBed.inject(ScreenSettingStore);
+    store.setPpi(138.5);
+
+    store.adjustForPixelRatio(2);
+
+    expect(store.ppi()).toBe(138.5);
+    expect(store.calibratedPixelRatio()).toBeNull();
+  });
+
   it('restores the ppi and the calibrated flag from storage', () => {
     localStorage.setItem(
       STORAGE_KEY,

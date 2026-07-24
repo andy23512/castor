@@ -13,6 +13,11 @@ export const DEFAULT_PPI = 96;
 export const MIN_PPI = 40;
 export const MAX_PPI = 400;
 
+/** How many device pixels one CSS pixel currently covers. */
+export function currentPixelRatio(): number {
+  return globalThis.devicePixelRatio || 1;
+}
+
 export function clampPpi(ppi: number): number {
   // A cleared input or a division by zero must not reach the camera.
   return Number.isFinite(ppi)
