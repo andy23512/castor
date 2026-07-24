@@ -79,6 +79,7 @@ export class App implements AfterViewInit {
     () => this.pan().x !== 0 || this.pan().y !== 0,
   );
   protected readonly isPanning = signal(false);
+  protected readonly hasModelFailed = signal(false);
 
   private frameHandle: number | null = null;
   private drag: { pointerId: number; x: number; y: number } | null = null;
@@ -130,6 +131,23 @@ export class App implements AfterViewInit {
     rimLight.position.set(0.1, -2.8, -5.8);
     this.scene.add(rimLight);
 
+    this.loadModel();
+    effect(() => {
+      this.screenSettingStore.ppi();
+      // Untracked: onResize both reads and writes the pan, which would
+      // otherwise make this effect re-trigger itself.
+      untracked(() => this.onResize());
+    });
+    this.destroyRef.onDestroy(() => {
+      if (this.frameHandle !== null) {
+        cancelAnimationFrame(this.frameHandle);
+      }
+      this.renderer.dispose();
+    });
+  }
+
+  private loadModel(): void {
+    this.hasModelFailed.set(false);
     // The model is meshopt-compressed; the decoder embeds its own wasm.
     const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
     loader.load(
@@ -173,22 +191,16 @@ export class App implements AfterViewInit {
       },
       undefined,
       (error) => {
+        // The details only help a developer; the user gets a retry instead.
         console.error(error);
+        this.hasModelFailed.set(true);
         this.promptCalibrationOnce();
       },
     );
-    effect(() => {
-      this.screenSettingStore.ppi();
-      // Untracked: onResize both reads and writes the pan, which would
-      // otherwise make this effect re-trigger itself.
-      untracked(() => this.onResize());
-    });
-    this.destroyRef.onDestroy(() => {
-      if (this.frameHandle !== null) {
-        cancelAnimationFrame(this.frameHandle);
-      }
-      this.renderer.dispose();
-    });
+  }
+
+  protected retryLoadingModel(): void {
+    this.loadModel();
   }
 
   public ngAfterViewInit(): void {
