@@ -8,6 +8,7 @@
     "test": "nx test"
   },
   "private": true,
+  "packageManager": "yarn@4.17.0",
   "dependencies": {
     "@angular-architects/ngrx-toolkit": "^21.0.1",
     "@angular/animations": "~21",

@@ -2,25 +2,42 @@ name: Deploy
 on:
   push:
     branches: [main]
+
+# A deploy force-pushes to gh-pages, so two of them must not overlap.
+concurrency:
+  group: deploy-pages
+  cancel-in-progress: false
+
 jobs:
-  build:
+  deploy:
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/checkout@v7
+
+      # Corepack runs the Yarn version pinned in package.json. Without it the
+      # runner's Yarn 1 ignores the Yarn 4 lockfile and resolves from scratch.
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Use Node.js
+        uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: Prepare and deploy
+          node-version: 22.x
+          cache: yarn
+
+      - name: Install
+        run: yarn install --immutable
+
+      - name: Lint
+        run: yarn nx lint
+
+      - name: Test
+        run: yarn nx test
+
+      - name: Deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          yarn
-          yarn nx deploy --no-silent
+        run: yarn nx deploy --no-silent
