@@ -1,13 +1,14 @@
 import {
   AfterViewInit,
   Component,
+  computed,
   effect,
   ElementRef,
   HostListener,
   inject,
   viewChild,
 } from '@angular/core';
-import { MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
@@ -32,7 +33,7 @@ import { SettingsDialogComponent } from './components/settings-dialog/settings-d
 import { ScreenSettingStore } from './stores/screen-setting.store';
 
 @Component({
-  imports: [RouterModule, MatIcon, MatIconButton],
+  imports: [RouterModule, MatIcon, MatButton, MatIconButton],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -42,6 +43,10 @@ import { ScreenSettingStore } from './stores/screen-setting.store';
 })
 export class App implements AfterViewInit {
   private readonly screenSettingStore = inject(ScreenSettingStore);
+  protected readonly isCalibrated = this.screenSettingStore.isCalibrated;
+  protected readonly ppiDisplay = computed(() =>
+    this.screenSettingStore.ppi().toFixed(1),
+  );
   private readonly rendererContainer =
     viewChild<ElementRef<HTMLDivElement>>('rendererContainer');
 
@@ -131,10 +136,12 @@ export class App implements AfterViewInit {
         });
         gltf.scene.rotation.x = Math.PI / 2;
         this.scene.add(gltf.scene); // Add loaded model
+        this.promptCalibrationOnce();
       },
       undefined,
       (error) => {
         console.error(error);
+        this.promptCalibrationOnce();
       },
     );
     effect(() => {
@@ -172,10 +179,32 @@ export class App implements AfterViewInit {
   }
 
   protected openSettingsDialog(): void {
+    if (this.matDialog.openDialogs.length > 0) {
+      return;
+    }
     this.matDialog.open(SettingsDialogComponent, {
-      width: '80vw',
-      minWidth: '80vw',
+      width: '560px',
+      maxWidth: '92vw',
+      // Focusing the first input would scroll the explanation out of view.
+      autoFocus: 'dialog',
     });
+  }
+
+  /**
+   * Invites the user to calibrate on their first visit, once the model is on
+   * screen so that the dialog has some context behind it. Skipping the prompt
+   * is remembered as well, so it is never shown a second time -- the badge in
+   * the corner stays until the calibration is actually confirmed.
+   */
+  private promptCalibrationOnce(): void {
+    if (
+      this.screenSettingStore.isCalibrated() ||
+      this.screenSettingStore.hasBeenPrompted()
+    ) {
+      return;
+    }
+    this.screenSettingStore.markPrompted();
+    this.openSettingsDialog();
   }
 
   private animate(): void {

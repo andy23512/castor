@@ -1,10 +1,19 @@
+<h2 mat-dialog-title>Screen Calibration</h2>
 <mat-dialog-content>
+  @if (!isCalibrated()) {
+    <p class="mb-4 text-sm opacity-80">
+      To show the device at its real size, this app needs to know how large one
+      inch is on your screen. Enter your display settings below, then hold a real
+      credit card against the orange rectangle to check the result.
+    </p>
+  }
   <div>
     Logical Resolution:
     <mat-form-field appearance="outline" class="!w-32 compact-form-field">
       <input
         matInput
         type="number"
+        min="1"
         [ngModel]="logicalResolutionWidth()"
         (ngModelChange)="setScreenSetting('logicalResolutionWidth', $event)"
       />
@@ -14,6 +23,7 @@
       <input
         matInput
         type="number"
+        min="1"
         [ngModel]="logicalResolutionHeight()"
         (ngModelChange)="setScreenSetting('logicalResolutionHeight', $event)"
       />
@@ -25,6 +35,8 @@
       <input
         matInput
         type="number"
+        min="1"
+        step="0.1"
         [ngModel]="screenSizeInInches()"
         (ngModelChange)="setScreenSetting('screenSizeInInches', $event)"
       />
@@ -36,6 +48,7 @@
       <input
         matInput
         type="number"
+        min="1"
         [ngModel]="zoomPercentage()"
         (ngModelChange)="setScreenSetting('zoomPercentage', $event)"
       />
@@ -64,7 +77,7 @@
         </mrow>
       </mfrac>
       <mo>=</mo>
-      <mi>{{ ppi() }}</mi>
+      <mi>{{ ppiDisplay() }}</mi>
     </math>
   </div>
   <div class="mt-2">
@@ -81,5 +94,12 @@
   </div>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Close</button>
+  @if (isCalibrated()) {
+    <button mat-button mat-dialog-close>Close</button>
+  } @else {
+    <button mat-button mat-dialog-close>Later</button>
+  }
+  <button mat-flat-button (click)="confirmCalibration()">
+    {{ isCalibrated() ? 'Save' : 'Done' }}
+  </button>
 </mat-dialog-actions>

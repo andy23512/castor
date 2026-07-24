@@ -14,6 +14,8 @@ import {
   MatDialogActions,
   MatDialogClose,
   MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
 } from '@angular/material/dialog';
 import { MatFormField } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -30,6 +32,7 @@ import { ScreenSettingStore } from '../../stores/screen-setting.store';
     MatDialogActions,
     MatDialogClose,
     MatDialogContent,
+    MatDialogTitle,
     MatButton,
     MatFormField,
     MatInput,
@@ -38,6 +41,8 @@ import { ScreenSettingStore } from '../../stores/screen-setting.store';
 })
 export class SettingsDialogComponent {
   private readonly screenSettingStore = inject(ScreenSettingStore);
+  private readonly dialogRef =
+    inject<MatDialogRef<SettingsDialogComponent>>(MatDialogRef);
   protected readonly logicalResolutionWidth =
     this.screenSettingStore.logicalResolutionWidth;
   protected readonly logicalResolutionHeight =
@@ -46,6 +51,8 @@ export class SettingsDialogComponent {
     this.screenSettingStore.screenSizeInInches;
   protected readonly zoomPercentage = this.screenSettingStore.zoomPercentage;
   protected readonly ppi = this.screenSettingStore.ppi;
+  protected readonly isCalibrated = this.screenSettingStore.isCalibrated;
+  protected readonly ppiDisplay = computed(() => this.ppi().toFixed(2));
   private readonly inchRulerElement =
     viewChild<ElementRef<HTMLDivElement>>('inchRuler');
   private inchRulerInstance: Ruler | null = null;
@@ -101,6 +108,11 @@ export class SettingsDialogComponent {
     value: ScreenSetting[K],
   ): void {
     this.screenSettingStore.set(key, value);
+  }
+
+  protected confirmCalibration(): void {
+    this.screenSettingStore.markCalibrated();
+    this.dialogRef.close();
   }
 
   @HostListener('window:resize')

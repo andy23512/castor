@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "castor",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["nx", "serve", "--port", "8315"],
+      "port": 8315
+    }
+  ]
+}
