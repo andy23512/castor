@@ -1,105 +1,79 @@
 # Castor
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+See a CharaChorder device at its real, physical size on a flat screen — before you buy one.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+Photos and spec sheets do not tell you how a device feels in your hands. Castor renders the
+CharaChorder Two model at 1:1 scale in the browser: you calibrate your screen once by matching a
+bank card, and from then on what you see is what you would hold.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-standalone-tutorial?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+**[Try it &raquo;](https://andy23512.github.io/castor/)**
 
-## Run tasks
+## Calibrating your screen
 
-To run the dev server for your app, use:
+A browser cannot know how large your screen physically is, so Castor asks once. The calibration
+dialog opens on your first visit, and a badge stays in the corner until you confirm it.
 
-```sh
-npx nx serve castor
+1. Hold any ID-1 card against the screen — a bank card, driving licence or most ID cards. The
+   format is 85.60 x 53.98 mm worldwide, which makes it a reliable ruler.
+2. Drag the corner handle of the on-screen rectangle, or use the slider, until it matches the card.
+   On a phone the card is shown upright, because a card is wider than a phone screen.
+3. Cross-check against the inch and centimetre rulers below it, then press **Done**.
+
+No card at hand? The advanced panel derives the same value from your logical resolution, screen
+size and browser zoom. It is less accurate, because the advertised screen size is usually rounded
+(a "24 inch" panel is often 23.8 inch).
+
+The calibration is stored in `localStorage`, per browser. Calibrate again if you change the browser
+zoom or the display scaling, or if you move the window to a monitor with a different pixel density.
+
+## How it works
+
+Everything is derived from one number: `pixelsPerInch`, how many CSS pixels one inch of your screen
+is.
+
+- The scene uses an orthographic camera whose frustum is sized in metres:
+  `visible width = clientWidth / ppi * 0.0254`. Nothing scales the model itself.
+- The model (`static/charachorder-models`) is modelled in metres, straight from the CharaChorder
+  CAD sources, so its dimensions are the physical ones.
+- The background grid is 1 cm per cell.
+
+## Development
+
+Requires Node 22+ and yarn.
+
+```bash
+yarn install
 ```
 
-To create a production bundle:
-
-```sh
-npx nx build castor
+```bash
+yarn start
 ```
 
-To see all available targets to run for a project, run:
+The dev server runs at http://localhost:8315.
 
-```sh
-npx nx show project castor
+```bash
+yarn test
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/angular:app demo
+```bash
+yarn build
 ```
 
-To generate a new library, use:
+Source layout:
 
-```sh
-npx nx g @nx/angular:lib mylib
-```
+| Path                            | Contents                                            |
+| ------------------------------- | --------------------------------------------------- |
+| `src/app/app.ts`                | Scene, orthographic camera, lighting, model loading  |
+| `src/app/components/`           | Calibration card and settings dialog                 |
+| `src/app/stores/`               | Screen setting store, persisted to `localStorage`    |
+| `src/app/utils/`                | Calibration maths (card format, ppi derivation)      |
+| `static/charachorder-models/`   | Device models (`.glb`)                               |
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+## Deployment
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Set up CI!
-
-### Step 1
-
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
-```
-
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-standalone-tutorial?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Pushing to `main` deploys to GitHub Pages through
+[.github/workflows/main.yml](.github/workflows/main.yml) using `angular-cli-ghpages`. A GitLab CI
+configuration for GitLab Pages is included as an alternative.
 
 ## License
 
