@@ -1,12 +1,16 @@
 <div
   #rendererContainer
-  class="size-full touch-none"
+  class="size-full touch-none outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-cyan-400"
   [class.cursor-grab]="viewMode() === 'actual' && canPan() && !isPanning()"
   [class.cursor-grabbing]="isPanning()"
+  tabindex="0"
+  role="application"
+  aria-label="CharaChorder viewer. Arrow keys pan when calibrated."
   (pointerdown)="onPanStart($event)"
   (pointermove)="onPanMove($event)"
   (pointerup)="onPanEnd($event)"
   (pointercancel)="onPanEnd($event)"
+  (keydown)="onKeydown($event)"
 ></div>
 <button
   mat-icon-button

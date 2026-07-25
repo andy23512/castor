@@ -351,6 +351,38 @@ export class App implements AfterViewInit {
     this.setPan(0, 0);
   }
 
+  /** Keyboard panning, so the off-screen parts are reachable without a mouse. */
+  protected onKeydown(event: KeyboardEvent): void {
+    if (this.viewMode() !== 'actual') {
+      return;
+    }
+    const view = this.viewSize();
+    const fraction = event.shiftKey ? 0.25 : 0.1;
+    const stepX = view.width * fraction;
+    const stepY = view.height * fraction;
+    const pan = this.pan();
+    switch (event.key) {
+      case 'ArrowLeft':
+        this.setPan(pan.x - stepX, pan.y);
+        break;
+      case 'ArrowRight':
+        this.setPan(pan.x + stepX, pan.y);
+        break;
+      case 'ArrowUp':
+        this.setPan(pan.x, pan.y + stepY);
+        break;
+      case 'ArrowDown':
+        this.setPan(pan.x, pan.y - stepY);
+        break;
+      case 'Home':
+        this.setPan(0, 0);
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+  }
+
   protected toggleObserve(): void {
     if (this.viewMode() === 'observe') {
       this.exitObserve();
