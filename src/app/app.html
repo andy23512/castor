@@ -1,7 +1,7 @@
 <div
   #rendererContainer
   class="size-full touch-none"
-  [class.cursor-grab]="canPan() && !isPanning()"
+  [class.cursor-grab]="viewMode() === 'actual' && canPan() && !isPanning()"
   [class.cursor-grabbing]="isPanning()"
   (pointerdown)="onPanStart($event)"
   (pointermove)="onPanMove($event)"
@@ -23,7 +23,17 @@
 >
   <mat-icon>straighten</mat-icon>
 </button>
-@if (isPanned()) {
+<button
+  mat-icon-button
+  class="!absolute top-0 left-24"
+  [attr.aria-pressed]="viewMode() === 'observe'"
+  aria-label="Rotate the model"
+  [class.!text-cyan-400]="viewMode() === 'observe'"
+  (click)="toggleObserve()"
+>
+  <mat-icon>3d_rotation</mat-icon>
+</button>
+@if (viewMode() === 'actual' && isPanned()) {
   <button
     mat-icon-button
     class="!absolute top-0 right-0"
@@ -45,7 +55,17 @@
     <button mat-flat-button (click)="retryLoadingModel()">Retry</button>
   </div>
 }
-@if (isCalibrationStale()) {
+@if (viewMode() === 'observe') {
+  <div
+    class="!absolute bottom-4 left-1/2 flex max-w-[92vw] -translate-x-1/2 flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-2xl bg-white/5 px-4 py-2 text-sm text-slate-300 ring-1 ring-white/10"
+  >
+    <span class="flex items-center gap-2">
+      <mat-icon class="!h-5 !w-5 !text-[20px] text-cyan-400">3d_rotation</mat-icon>
+      Observing &mdash; drag to rotate, scroll to zoom. Not at actual size.
+    </span>
+    <button mat-flat-button (click)="toggleObserve()">Actual size</button>
+  </div>
+} @else if (isCalibrationStale()) {
   <div
     class="!absolute bottom-4 left-1/2 flex max-w-[92vw] -translate-x-1/2 flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-2xl bg-amber-500/15 px-4 py-2 text-sm text-amber-100 ring-1 ring-amber-400/40"
   >

@@ -32,6 +32,7 @@ import {
   Vector3,
   WebGLRenderer,
 } from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -89,6 +90,14 @@ export class App implements AfterViewInit {
   protected readonly isPanning = signal(false);
   protected readonly hasModelFailed = signal(false);
   protected readonly isComparisonOpen = signal(false);
+
+  /**
+   * 'actual' is the top-down, actual-size view. 'observe' lets the model be
+   * rotated to appreciate its shape, at which point it is no longer at actual
+   * size, so the badge says so.
+   */
+  protected readonly viewMode = signal<'actual' | 'observe'>('actual');
+  private controls: OrbitControls | null = null;
 
   private readonly pixelRatio = signal(currentPixelRatio());
   /** A CSS pixel is no longer the size the calibration was measured at. */
@@ -255,6 +264,20 @@ export class App implements AfterViewInit {
     }
     this.onResize();
     element.appendChild(this.renderer.domElement);
+
+    // Rotation for observe mode. Disabled until the mode is entered so it never
+    // interferes with panning. Panning is the custom handler's job, and zoom in
+    // metres would break actual size, so both are left to OrbitControls only
+    // while observing.
+    const controls = new OrbitControls(this.camera, this.renderer.domElement);
+    controls.enablePan = false;
+    controls.enabled = false;
+    controls.minZoom = 0.4;
+    controls.maxZoom = 6;
+    controls.addEventListener('change', () => this.requestRender());
+    this.controls = controls;
+    this.destroyRef.onDestroy(() => controls.dispose());
+
     this.requestRender();
   }
 
@@ -278,12 +301,18 @@ export class App implements AfterViewInit {
     this.camera.updateProjectionMatrix();
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(element.clientWidth, element.clientHeight);
+    if (this.viewMode() === 'observe') {
+      // Keep the frustum in sync but leave the orbiting camera where it is.
+      this.controls?.update();
+      this.requestRender();
+      return;
+    }
     // A smaller view, or a new model, can put the camera out of bounds.
     this.setPan(this.pan().x, this.pan().y);
   }
 
   protected onPanStart(event: PointerEvent): void {
-    if (!this.canPan()) {
+    if (this.viewMode() === 'observe' || !this.canPan()) {
       return;
     }
     this.drag = {
@@ -320,6 +349,47 @@ export class App implements AfterViewInit {
 
   protected recenter(): void {
     this.setPan(0, 0);
+  }
+
+  protected toggleObserve(): void {
+    if (this.viewMode() === 'observe') {
+      this.exitObserve();
+    } else {
+      this.enterObserve();
+    }
+  }
+
+  private enterObserve(): void {
+    this.viewMode.set('observe');
+    // Start centred and front-on, which is the actual-size view, then let the
+    // user rotate away from it.
+    this.setPan(0, 0);
+    this.resetCameraOrientation();
+    if (this.controls) {
+      this.controls.target.set(0, 0, 0);
+      this.controls.enabled = true;
+      this.controls.update();
+    }
+    this.requestRender();
+  }
+
+  private exitObserve(): void {
+    this.viewMode.set('actual');
+    if (this.controls) {
+      this.controls.enabled = false;
+    }
+    this.resetCameraOrientation();
+    // Restores the actual-size frustum and re-centres the camera.
+    this.onResize();
+  }
+
+  /** Back to looking straight down the -Z axis at unit zoom. */
+  private resetCameraOrientation(): void {
+    this.camera.up.set(0, 1, 0);
+    this.camera.position.set(0, 0, 6);
+    this.camera.rotation.set(0, 0, 0);
+    this.camera.zoom = 1;
+    this.camera.updateProjectionMatrix();
   }
 
   private setPan(x: number, y: number): void {
