@@ -10,18 +10,27 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
+import {
+  MatButtonToggle,
+  MatButtonToggleGroup,
+} from '@angular/material/button-toggle';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { COMPARISON_DEVICES, Device } from '../../models/device.models';
+import { REFERENCE_OBJECTS } from '../../models/reference.models';
 import { ScreenSettingStore } from '../../stores/screen-setting.store';
 import { mmToPixels } from '../../utils/pan.utils';
 
-interface DeviceBox {
-  device: Device;
+interface Box {
+  id: string;
+  name: string;
+  widthMm: number;
+  depthMm: number;
   widthPx: number;
   depthPx: number;
   color: string;
+  /** References are drawn dashed and unfilled, behind the devices. */
+  dashed: boolean;
 }
 
 // Concrete values keep Tailwind from purging dynamically built colour classes.
@@ -30,8 +39,12 @@ const ACCENT_COLORS: Record<Device['accent'], string> = {
   sky: '#38bdf8',
   emerald: '#34d399',
 };
+const REFERENCE_COLOR = '#94a3b8';
 
 const STAGE_MARGIN_PX = 48;
+
+const byAreaDesc = (a: Box, b: Box): number =>
+  b.widthPx * b.depthPx - a.widthPx * a.depthPx;
 
 @Component({
   selector: 'app-size-comparison',
@@ -51,18 +64,45 @@ export class SizeComparisonComponent {
 
   /** 'fit' scales everything down so the whole comparison is visible. */
   protected readonly mode = signal<'fit' | 'actual'>('fit');
+  protected readonly showReferences = signal(false);
   private readonly stage = viewChild.required<ElementRef<HTMLElement>>('stage');
   private readonly available = signal({ width: 0, height: 0 });
 
-  /** Largest first, so smaller outlines stack on top and stay visible. */
-  private readonly actualBoxes = computed(() => {
+  private readonly actualDevices = computed<Box[]>(() => {
     const ppi = this.screenSettingStore.ppi();
     return COMPARISON_DEVICES.map((device) => ({
-      device,
+      id: device.id,
+      name: device.name,
+      widthMm: device.widthMm,
+      depthMm: device.depthMm,
       widthPx: mmToPixels(device.widthMm, ppi),
       depthPx: mmToPixels(device.depthMm, ppi),
       color: ACCENT_COLORS[device.accent],
-    })).sort((a, b) => b.widthPx * b.depthPx - a.widthPx * a.depthPx);
+      dashed: false,
+    }));
+  });
+
+  private readonly actualReferences = computed<Box[]>(() => {
+    const ppi = this.screenSettingStore.ppi();
+    return REFERENCE_OBJECTS.map((ref) => ({
+      id: ref.id,
+      name: ref.name,
+      widthMm: ref.widthMm,
+      depthMm: ref.depthMm,
+      widthPx: mmToPixels(ref.widthMm, ppi),
+      depthPx: mmToPixels(ref.depthMm, ppi),
+      color: REFERENCE_COLOR,
+      dashed: true,
+    }));
+  });
+
+  /** References first, so they sit behind the devices; each group largest first. */
+  private readonly actualBoxes = computed<Box[]>(() => {
+    const devices = [...this.actualDevices()].sort(byAreaDesc);
+    if (!this.showReferences()) {
+      return devices;
+    }
+    return [...[...this.actualReferences()].sort(byAreaDesc), ...devices];
   });
 
   private readonly actualWidth = computed(() =>
@@ -93,7 +133,7 @@ export class SizeComparisonComponent {
   );
 
   // Labels keep their real size; only the outlines scale.
-  protected readonly boxes = computed<DeviceBox[]>(() => {
+  protected readonly boxes = computed<Box[]>(() => {
     const scale = this.scale();
     return this.actualBoxes().map((b) => ({
       ...b,
@@ -101,10 +141,17 @@ export class SizeComparisonComponent {
       depthPx: b.depthPx * scale,
     }));
   });
-  protected readonly stageWidth = computed(() => this.actualWidth() * this.scale());
+  /** Devices only, for the legend, in the listed order. */
+  protected readonly deviceBoxes = computed(() => this.actualDevices());
+  protected readonly referenceBoxes = computed(() => this.actualReferences());
+
+  protected readonly stageWidth = computed(
+    () => this.actualWidth() * this.scale(),
+  );
   protected readonly stageHeight = computed(
     () => this.actualHeight() * this.scale(),
   );
+  protected readonly referenceColor = REFERENCE_COLOR;
 
   constructor() {
     afterNextRender(() => {
@@ -123,6 +170,10 @@ export class SizeComparisonComponent {
 
   protected setMode(mode: 'fit' | 'actual'): void {
     this.mode.set(mode);
+  }
+
+  protected toggleReferences(): void {
+    this.showReferences.update((shown) => !shown);
   }
 
   protected close(): void {

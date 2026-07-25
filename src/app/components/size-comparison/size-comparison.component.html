@@ -16,6 +16,15 @@
     </p>
   </div>
   <div class="flex items-center gap-2">
+    <button
+      mat-button
+      type="button"
+      [attr.aria-pressed]="showReferences()"
+      (click)="toggleReferences()"
+    >
+      <mat-icon>keyboard</mat-icon>
+      {{ showReferences() ? 'Hide keyboards' : 'Vs a keyboard' }}
+    </button>
     <mat-button-toggle-group
       [value]="mode()"
       (change)="setMode($event.value)"
@@ -46,13 +55,15 @@
     [style.width.px]="stageWidth()"
     [style.height.px]="stageHeight()"
   >
-    @for (box of boxes(); track box.device.id; let i = $index) {
+    @for (box of boxes(); track box.id; let i = $index) {
       <div
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg"
         [style.width.px]="box.widthPx"
         [style.height.px]="box.depthPx"
-        [style.border]="'2px solid ' + box.color"
-        [style.background-color]="box.color + '1f'"
+        [style.border]="
+          '2px ' + (box.dashed ? 'dashed' : 'solid') + ' ' + box.color
+        "
+        [style.background-color]="box.dashed ? 'transparent' : box.color + '1f'"
       >
         <span
           class="absolute left-2 rounded px-1.5 py-0.5 text-xs font-medium whitespace-nowrap"
@@ -60,7 +71,7 @@
           [style.color]="box.color"
           [style.background-color]="'#14161bcc'"
         >
-          {{ box.device.name }}
+          {{ box.name }}
         </span>
       </div>
     }
@@ -69,18 +80,36 @@
 
 <footer class="border-t border-white/10 px-5 py-3">
   <ul class="flex flex-wrap gap-x-6 gap-y-2">
-    @for (box of boxes(); track box.device.id) {
+    @for (box of deviceBoxes(); track box.id) {
       <li class="flex items-center gap-2 text-sm text-slate-300">
         <span
           class="inline-block h-3 w-3 shrink-0 rounded-sm"
           [style.background-color]="box.color"
         ></span>
-        <span class="font-medium text-slate-100">{{ box.device.name }}</span>
+        <span class="font-medium text-slate-100">{{ box.name }}</span>
         <span class="text-slate-400">
-          {{ box.device.widthMm }} &times; {{ box.device.depthMm }} &times;
-          {{ box.device.heightMm }} mm &middot; {{ box.device.weightG }} g
+          {{ box.widthMm }} &times; {{ box.depthMm }} mm
         </span>
       </li>
     }
+    @if (showReferences()) {
+      @for (box of referenceBoxes(); track box.id) {
+        <li class="flex items-center gap-2 text-sm text-slate-400">
+          <span
+            class="inline-block h-3 w-3 shrink-0 rounded-sm border border-dashed"
+            [style.border-color]="referenceColor"
+          ></span>
+          <span>{{ box.name }}</span>
+          <span class="text-slate-500">
+            {{ box.widthMm }} &times; {{ box.depthMm }} mm
+          </span>
+        </li>
+      }
+    }
   </ul>
+  @if (showReferences()) {
+    <p class="mt-2 text-xs text-slate-500">
+      Keyboard footprints are typical sizes, not any one model.
+    </p>
+  }
 </footer>
