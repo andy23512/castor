@@ -15,6 +15,14 @@
 >
   <mat-icon>settings</mat-icon>
 </button>
+<button
+  mat-icon-button
+  class="!absolute top-0 left-12"
+  aria-label="Compare device sizes"
+  (click)="openComparison()"
+>
+  <mat-icon>straighten</mat-icon>
+</button>
 @if (isPanned()) {
   <button
     mat-icon-button
@@ -69,4 +77,7 @@
     </span>
     <button mat-flat-button (click)="openSettingsDialog()">Calibrate</button>
   </div>
+}
+@if (isComparisonOpen()) {
+  <app-size-comparison (closed)="closeComparison()" />
 }

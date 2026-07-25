@@ -1,0 +1,86 @@
+<header class="flex items-start justify-between gap-4 px-5 py-4">
+  <div>
+    <h1 class="text-lg font-medium text-slate-100">Size comparison</h1>
+    <p class="mt-0.5 text-sm text-slate-400">
+      @if (mode() === 'actual') {
+        @if (isCalibrated()) {
+          Actual size, from published dimensions.
+        } @else {
+          Calibrate first for this to be at actual size.
+        }
+      } @else if (isScaledDown()) {
+        Scaled to {{ scalePercent() }}% to fit &mdash; not actual size.
+      } @else {
+        From published dimensions.
+      }
+    </p>
+  </div>
+  <div class="flex items-center gap-2">
+    <mat-button-toggle-group
+      [value]="mode()"
+      (change)="setMode($event.value)"
+      aria-label="Display scale"
+      hideSingleSelectionIndicator
+    >
+      <mat-button-toggle value="fit">Fit</mat-button-toggle>
+      <mat-button-toggle value="actual">Actual size</mat-button-toggle>
+    </mat-button-toggle-group>
+    <button mat-icon-button aria-label="Close the comparison" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</header>
+
+<!-- In actual-size mode the outlines are usually larger than the viewport, so
+     this area scrolls; in fit mode everything is scaled to sit inside it. -->
+<div
+  #stage
+  class="min-h-0 flex-1"
+  [class.overflow-auto]="mode() === 'actual'"
+  [class.overflow-hidden]="mode() === 'fit'"
+  [class.grid]="mode() === 'fit'"
+  [class.place-items-center]="mode() === 'fit'"
+>
+  <div
+    class="relative mx-auto my-6"
+    [style.width.px]="stageWidth()"
+    [style.height.px]="stageHeight()"
+  >
+    @for (box of boxes(); track box.device.id; let i = $index) {
+      <div
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg"
+        [style.width.px]="box.widthPx"
+        [style.height.px]="box.depthPx"
+        [style.border]="'2px solid ' + box.color"
+        [style.background-color]="box.color + '1f'"
+      >
+        <span
+          class="absolute left-2 rounded px-1.5 py-0.5 text-xs font-medium whitespace-nowrap"
+          [style.top.px]="6 + i * 24"
+          [style.color]="box.color"
+          [style.background-color]="'#14161bcc'"
+        >
+          {{ box.device.name }}
+        </span>
+      </div>
+    }
+  </div>
+</div>
+
+<footer class="border-t border-white/10 px-5 py-3">
+  <ul class="flex flex-wrap gap-x-6 gap-y-2">
+    @for (box of boxes(); track box.device.id) {
+      <li class="flex items-center gap-2 text-sm text-slate-300">
+        <span
+          class="inline-block h-3 w-3 shrink-0 rounded-sm"
+          [style.background-color]="box.color"
+        ></span>
+        <span class="font-medium text-slate-100">{{ box.device.name }}</span>
+        <span class="text-slate-400">
+          {{ box.device.widthMm }} &times; {{ box.device.depthMm }} &times;
+          {{ box.device.heightMm }} mm &middot; {{ box.device.weightG }} g
+        </span>
+      </li>
+    }
+  </ul>
+</footer>

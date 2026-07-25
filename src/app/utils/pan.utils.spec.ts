@@ -1,9 +1,15 @@
-import { clampPanOffset, pixelsToMetres } from './pan.utils';
+import { clampPanOffset, mmToPixels, pixelsToMetres } from './pan.utils';
 
 describe('pan utils', () => {
   it('converts pixels to metres through the calibrated ppi', () => {
     expect(pixelsToMetres(96, 96)).toBeCloseTo(0.0254, 6);
     expect(pixelsToMetres(138.5, 138.5)).toBeCloseTo(0.0254, 6);
+  });
+
+  it('converts millimetres to pixels through the calibrated ppi', () => {
+    // One inch is 25.4 mm, so at 138.5 ppi it is 138.5 px.
+    expect(mmToPixels(25.4, 138.5)).toBeCloseTo(138.5, 6);
+    expect(mmToPixels(295, 96)).toBeCloseTo((295 / 25.4) * 96, 6);
   });
 
   it('does not pan while the model fits on screen', () => {

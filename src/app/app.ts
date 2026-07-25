@@ -36,12 +36,19 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SettingsDialogComponent } from './components/settings-dialog/settings-dialog.component';
+import { SizeComparisonComponent } from './components/size-comparison/size-comparison.component';
 import { ScreenSettingStore } from './stores/screen-setting.store';
 import { currentPixelRatio } from './utils/calibration.utils';
 import { clampPanOffset, pixelsToMetres } from './utils/pan.utils';
 
 @Component({
-  imports: [RouterModule, MatIcon, MatButton, MatIconButton],
+  imports: [
+    RouterModule,
+    MatIcon,
+    MatButton,
+    MatIconButton,
+    SizeComparisonComponent,
+  ],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -81,6 +88,7 @@ export class App implements AfterViewInit {
   );
   protected readonly isPanning = signal(false);
   protected readonly hasModelFailed = signal(false);
+  protected readonly isComparisonOpen = signal(false);
 
   private readonly pixelRatio = signal(currentPixelRatio());
   /** A CSS pixel is no longer the size the calibration was measured at. */
@@ -210,6 +218,14 @@ export class App implements AfterViewInit {
 
   protected retryLoadingModel(): void {
     this.loadModel();
+  }
+
+  protected openComparison(): void {
+    this.isComparisonOpen.set(true);
+  }
+
+  protected closeComparison(): void {
+    this.isComparisonOpen.set(false);
   }
 
   /**
