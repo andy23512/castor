@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <!-- Maskable app icon: full-bleed background with the CC2 mark kept inside
+       the safe zone so launchers can crop the corners. -->
+  <rect width="192" height="192" fill="#1a1c22" />
+  <rect x="63" y="89.2" width="66" height="13.6" rx="2.4" fill="#8f9bb3" />
+  <circle cx="63" cy="96" r="22" fill="#e2e8f0" />
+  <circle cx="129" cy="96" r="22" fill="#e2e8f0" />
+</svg>
