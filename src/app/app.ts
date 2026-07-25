@@ -89,6 +89,13 @@ export class App implements AfterViewInit {
   );
   protected readonly isPanning = signal(false);
   protected readonly hasModelFailed = signal(false);
+  protected readonly isModelLoading = signal(true);
+  /** 0..1 while downloading, or null when the size is not known. */
+  protected readonly loadProgress = signal<number | null>(null);
+  protected readonly loadPercent = computed(() => {
+    const progress = this.loadProgress();
+    return progress === null ? null : Math.round(progress * 100);
+  });
   protected readonly isComparisonOpen = signal(false);
 
   /**
@@ -174,6 +181,8 @@ export class App implements AfterViewInit {
 
   private loadModel(): void {
     this.hasModelFailed.set(false);
+    this.isModelLoading.set(true);
+    this.loadProgress.set(null);
     // The model is meshopt-compressed; the decoder embeds its own wasm.
     const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
     loader.load(
@@ -212,12 +221,20 @@ export class App implements AfterViewInit {
           .setFromObject(gltf.scene)
           .getSize(new Vector3());
         this.modelSize.set({ width: size.x, height: size.y });
+        this.isModelLoading.set(false);
         this.onResize();
         this.promptCalibrationOnce();
       },
-      undefined,
+      (event) => {
+        // lengthComputable is false when the server sends no Content-Length,
+        // in which case the bar stays indeterminate.
+        this.loadProgress.set(
+          event.lengthComputable ? event.loaded / event.total : null,
+        );
+      },
       (error) => {
         // The details only help a developer; the user gets a retry instead.
+        this.isModelLoading.set(false);
         console.error(error);
         this.hasModelFailed.set(true);
         this.promptCalibrationOnce();
