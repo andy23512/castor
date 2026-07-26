@@ -37,6 +37,35 @@
 >
   <mat-icon>3d_rotation</mat-icon>
 </button>
+@if (isArSupported()) {
+  <button
+    mat-icon-button
+    class="!absolute top-0 left-36"
+    aria-label="View in your space with AR"
+    (click)="enterAr()"
+  >
+    <mat-icon>view_in_ar</mat-icon>
+  </button>
+}
+
+<!-- Always present so it can be the AR DOM-overlay root when a session starts. -->
+<div #arOverlay>
+  @if (isArActive()) {
+    <div
+      class="!fixed bottom-6 left-1/2 flex max-w-[92vw] -translate-x-1/2 flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-2xl bg-black/60 px-4 py-2 text-sm text-white ring-1 ring-white/20"
+    >
+      <span class="flex items-center gap-2">
+        <mat-icon class="!h-5 !w-5 !text-[20px] text-cyan-400">view_in_ar</mat-icon>
+        @if (isArPlaced()) {
+          Tap another spot to move it.
+        } @else {
+          Point at a flat surface, then tap to place it at actual size.
+        }
+      </span>
+      <button mat-flat-button (click)="exitAr()">Exit AR</button>
+    </div>
+  }
+</div>
 @if (viewMode() === 'actual' && isPanned()) {
   <button
     mat-icon-button

@@ -22,11 +22,15 @@ import {
   Color,
   DirectionalLight,
   GridHelper,
+  Group,
   HemisphereLight,
   Mesh,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   OrthographicCamera,
+  PerspectiveCamera,
   PMREMGenerator,
+  RingGeometry,
   Scene,
   SRGBColorSpace,
   Vector3,
@@ -65,13 +69,17 @@ export class App implements AfterViewInit {
   );
   private readonly rendererContainer =
     viewChild<ElementRef<HTMLDivElement>>('rendererContainer');
+  private readonly arOverlay = viewChild<ElementRef<HTMLElement>>('arOverlay');
 
   private readonly matDialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly renderer = new WebGLRenderer();
+  // alpha lets the camera feed show through in an AR session.
+  private readonly renderer = new WebGLRenderer({ alpha: true });
   private readonly scene = new Scene();
   private readonly camera: OrthographicCamera;
+  /** A perspective camera is used for AR; XR drives it from the headset pose. */
+  private readonly arCamera = new PerspectiveCamera(70, 1, 0.01, 20);
 
   /** Everything below is in metres, the unit the scene is modelled in. */
   private readonly viewSize = signal({ width: 0, height: 0 });
@@ -105,6 +113,17 @@ export class App implements AfterViewInit {
    */
   protected readonly viewMode = signal<'actual' | 'observe'>('actual');
   private controls: OrbitControls | null = null;
+
+  /** AR is a progressive enhancement: the button only appears where the device
+   * and browser support an immersive-ar WebXR session (Android Chrome today). */
+  protected readonly isArSupported = signal(false);
+  protected readonly isArActive = signal(false);
+  protected readonly isArPlaced = signal(false);
+  private arSession: XRSession | null = null;
+  private hitTestSource: XRHitTestSource | null = null;
+  private gridHelper!: GridHelper;
+  private model: Group | null = null;
+  private reticle!: Mesh;
 
   private readonly pixelRatio = signal(currentPixelRatio());
   /** A CSS pixel is no longer the size the calibration was measured at. */
@@ -140,6 +159,16 @@ export class App implements AfterViewInit {
       material.depthTest = true;
     }
     this.scene.add(gridHelper);
+    this.gridHelper = gridHelper;
+
+    // A ring that lies flat on the detected surface until the user taps.
+    this.reticle = new Mesh(
+      new RingGeometry(0.05, 0.06, 32).rotateX(-Math.PI / 2),
+      new MeshBasicMaterial({ color: 0x22d3ee }),
+    );
+    this.reticle.matrixAutoUpdate = false;
+    this.reticle.visible = false;
+    this.scene.add(this.reticle);
 
     const pmremGenerator = new PMREMGenerator(this.renderer);
     this.scene.environment = pmremGenerator.fromScene(
@@ -217,6 +246,8 @@ export class App implements AfterViewInit {
         });
         gltf.scene.rotation.x = Math.PI / 2;
         this.scene.add(gltf.scene); // Add loaded model
+        this.model = gltf.scene;
+        this.model.visible = !this.isArActive();
         const size = new Box3()
           .setFromObject(gltf.scene)
           .getSize(new Vector3());
@@ -294,6 +325,14 @@ export class App implements AfterViewInit {
     controls.addEventListener('change', () => this.requestRender());
     this.controls = controls;
     this.destroyRef.onDestroy(() => controls.dispose());
+
+    this.arCamera.aspect = element.clientWidth / element.clientHeight;
+    this.arCamera.updateProjectionMatrix();
+    void navigator.xr
+      ?.isSessionSupported('immersive-ar')
+      .then((supported) => this.isArSupported.set(supported))
+      .catch(() => this.isArSupported.set(false));
+    this.destroyRef.onDestroy(() => void this.arSession?.end());
 
     this.requestRender();
   }
@@ -440,6 +479,105 @@ export class App implements AfterViewInit {
     this.camera.zoom = 1;
     this.camera.updateProjectionMatrix();
   }
+
+  /**
+   * Starts an immersive-ar session. The model is already modelled in metres, so
+   * placing it on a surface detected by hit-testing shows it at actual size.
+   * Guarded by isArSupported, so this is never reached on an unsupported device.
+   */
+  protected async enterAr(): Promise<void> {
+    if (this.isArActive() || !navigator.xr) {
+      return;
+    }
+    if (this.viewMode() === 'observe') {
+      this.exitObserve();
+    }
+    let session: XRSession;
+    try {
+      session = await navigator.xr.requestSession('immersive-ar', {
+        requiredFeatures: ['hit-test'],
+        optionalFeatures: ['dom-overlay'],
+        domOverlay: { root: this.arOverlay()?.nativeElement ?? document.body },
+      });
+    } catch {
+      // The user dismissed the permission prompt, or AR became unavailable.
+      return;
+    }
+    this.arSession = session;
+    this.isArActive.set(true);
+    this.isArPlaced.set(false);
+
+    // Hand the scene to the camera feed: no dark background or grid.
+    this.scene.background = null;
+    this.gridHelper.visible = false;
+    this.reticle.visible = false;
+    if (this.model) {
+      this.model.visible = false;
+    }
+
+    this.renderer.xr.enabled = true;
+    this.renderer.xr.setReferenceSpaceType('local');
+    await this.renderer.xr.setSession(session);
+
+    const viewerSpace = await session.requestReferenceSpace('viewer');
+    this.hitTestSource =
+      (await session.requestHitTestSource?.({ space: viewerSpace })) ?? null;
+
+    session.addEventListener('select', this.onArSelect);
+    session.addEventListener('end', this.onArEnd);
+    this.renderer.setAnimationLoop(this.onArFrame);
+  }
+
+  protected exitAr(): void {
+    void this.arSession?.end();
+  }
+
+  private readonly onArSelect = (): void => {
+    if (!this.reticle.visible || !this.model) {
+      return;
+    }
+    this.model.position.setFromMatrixPosition(this.reticle.matrix);
+    this.model.visible = true;
+    this.isArPlaced.set(true);
+  };
+
+  private readonly onArFrame = (_time: number, frame?: XRFrame): void => {
+    const referenceSpace = this.renderer.xr.getReferenceSpace();
+    if (frame && referenceSpace && this.hitTestSource) {
+      const hits = frame.getHitTestResults(this.hitTestSource);
+      const pose = hits[0]?.getPose(referenceSpace);
+      if (pose) {
+        this.reticle.visible = true;
+        this.reticle.matrix.fromArray(pose.transform.matrix);
+      } else {
+        this.reticle.visible = false;
+      }
+    }
+    this.renderer.render(this.scene, this.arCamera);
+  };
+
+  private readonly onArEnd = (): void => {
+    this.arSession?.removeEventListener('select', this.onArSelect);
+    this.arSession?.removeEventListener('end', this.onArEnd);
+    this.hitTestSource = null;
+    this.arSession = null;
+    this.renderer.setAnimationLoop(null);
+    this.renderer.xr.enabled = false;
+    this.isArActive.set(false);
+    this.isArPlaced.set(false);
+
+    // Restore the ordinary actual-size scene.
+    this.scene.background = new Color(0x1f2127);
+    this.gridHelper.visible = true;
+    this.reticle.visible = false;
+    if (this.model) {
+      this.model.position.set(0, 0, 0);
+      this.model.visible = true;
+    }
+    this.resetCameraOrientation();
+    this.onResize();
+    this.requestRender();
+  };
 
   private setPan(x: number, y: number): void {
     const view = this.viewSize();
