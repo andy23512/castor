@@ -536,7 +536,16 @@ export class App implements AfterViewInit {
     if (!this.reticle.visible || !this.model) {
       return;
     }
-    this.model.position.setFromMatrixPosition(this.reticle.matrix);
+    const surface = new Vector3().setFromMatrixPosition(this.reticle.matrix);
+    // The top-down rotation that faces the ortho camera would stand the device
+    // upright on a Y-up surface, so AR uses the model's native orientation,
+    // which lies flat with its thickness pointing up.
+    this.model.rotation.set(0, 0, 0);
+    this.model.position.copy(surface);
+    this.model.updateMatrixWorld(true);
+    // Rest the base on the surface rather than centring it through the plane.
+    const box = new Box3().setFromObject(this.model);
+    this.model.position.y += surface.y - box.min.y;
     this.model.visible = true;
     this.isArPlaced.set(true);
   };
@@ -571,6 +580,8 @@ export class App implements AfterViewInit {
     this.gridHelper.visible = true;
     this.reticle.visible = false;
     if (this.model) {
+      // Back to the top-down orientation the ortho view expects.
+      this.model.rotation.set(Math.PI / 2, 0, 0);
       this.model.position.set(0, 0, 0);
       this.model.visible = true;
     }
