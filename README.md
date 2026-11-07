@@ -1,6 +1,7 @@
 # Castor
 
 See a CharaChorder device at its real, physical size on a flat screen — before you buy one.
+An unofficial tool, not affiliated with CharaChorder (see [Disclaimer](#disclaimer)).
 
 Photos and spec sheets do not tell you how a device feels in your hands. Castor renders the
 CharaChorder Two model at 1:1 scale in the browser: you calibrate your screen once by matching a
@@ -98,6 +99,15 @@ Source layout:
 Pushing to `main` deploys to GitHub Pages through
 [.github/workflows/main.yml](.github/workflows/main.yml) using `angular-cli-ghpages`. A GitLab CI
 configuration for GitLab Pages is included as an alternative.
+
+## Disclaimer
+
+1. This tool is not affiliated, associated, authorized, endorsed by, or in any way officially
+   connected with CharaChorder. Their official website can be found at
+   <https://www.charachorder.com/>.
+2. Your screen calibration is kept in the
+   [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) of your
+   browser. It is not transmitted to any other place via this tool.
 
 ## License
 

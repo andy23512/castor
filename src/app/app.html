@@ -118,6 +118,18 @@
     <button mat-flat-button (click)="openSettingsDialog()">Calibrate</button>
   </div>
 }
+<p
+  class="!absolute right-0 bottom-0 left-0 m-0 px-2 text-center text-xs leading-4 text-slate-400"
+>
+  Unofficial tool, not affiliated with
+  <a
+    class="underline"
+    href="https://www.charachorder.com/"
+    target="_blank"
+    rel="noopener"
+    >CharaChorder</a
+  >. Your calibration stays in your browser.
+</p>
 @if (isComparisonOpen()) {
   <app-size-comparison (closed)="closeComparison()" />
 }
