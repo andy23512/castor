@@ -1,5 +1,7 @@
 # Castor
 
+[![CI](https://github.com/andy23512/castor/actions/workflows/ci.yml/badge.svg)](https://github.com/andy23512/castor/actions/workflows/ci.yml)
+
 See a CharaChorder device at its real, physical size on a flat screen — before you buy one.
 An unofficial tool, not affiliated with CharaChorder (see [Disclaimer](#disclaimer)).
 
